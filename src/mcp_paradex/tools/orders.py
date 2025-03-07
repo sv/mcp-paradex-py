@@ -1,10 +1,12 @@
 """
 Order management tools.
 """
+from decimal import Decimal
 from typing import Dict, Any
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
+from paradex_py.common.order import Order, OrderSide, OrderType
 
 @server.tool("paradex-account-open-orders")
 async def get_account_open_orders(
@@ -20,16 +22,16 @@ async def get_account_open_orders(
         Dict[str, Any]: Account orders.
     """
     client = await get_authenticated_paradex_client()
-    response = client.fetch_orders(market_id)
+    response = client.fetch_orders(params={"market": market_id})
     return response
 
 @server.tool("paradex-create-order")
 async def create_order(
     market_id: str,
-    side: str,
-    type: str,
-    size: str,
-    price: str = None,
+    order_side: str,
+    order_type: str,
+    size: float,
+    price: float = None,
     client_id: str = None,
     time_in_force: str = None,
     post_only: bool = None,
@@ -40,12 +42,12 @@ async def create_order(
     
     Args:
         market_id (str): Market identifier.
-        side (str): Order side (BUY/SELL).
-        type (str): Order type (LIMIT/MARKET).
-        size (str): Order size.
-        price (str, optional): Order price (required for LIMIT orders).
+        order_side (str): Order side (BUY/SELL).
+        order_type (str): Order type (LIMIT/MARKET).
+        size (float): Order size.
+        price (float, optional): Order price (required for LIMIT orders).
         client_id (str, optional): Client-specified order ID.
-        time_in_force (str, optional): Time in force (GTC/IOC/FOK).
+        time_in_force (str, optional): Time in force (GTC).
         post_only (bool, optional): Post-only flag.
         reduce_only (bool, optional): Reduce-only flag.
         
@@ -53,8 +55,14 @@ async def create_order(
         Dict[str, Any]: Created order details.
     """
     client = await get_authenticated_paradex_client()
-    data = {k: v for k, v in locals().items() if v is not None and k != 'client'}
-    response = client.submit_order(data)
+    o = Order(
+        market=market_id,
+        order_side=OrderSide(order_side),
+        order_type=OrderType(order_type),
+        size=Decimal(str(size)),
+        limit_price=Decimal(str(price)) if price else Decimal(0),
+    )
+    response = client.submit_order(o)
     return response
 
 @server.tool("paradex-cancel-order")

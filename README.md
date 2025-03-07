@@ -75,25 +75,26 @@ Then edit the `.env` file with your Paradex credentials.
 
 ## Running the Server
 
-### Standard Mode (stdio transport)
+### Docker (recommended)
 
-This is the default mode, suitable for use with CLI tools like the MCP CLI:
-
-```bash
-python main.py
+```
+docker build . -t sv/mcp-paradex-py
 ```
 
-### Web Server Mode (SSE transport)
+### In Cursor add MCP as command
 
-This mode starts a web server, suitable for integration with web applications:
+Public only
 
-```bash
-python main.py --transport sse
+```
+docker run --rm -i sv/mcp-paradex-py
 ```
 
-The server will be available at http://0.0.0.0:8000 by default.
+Allow trading
 
-Note: The port is currently fixed at 8000 for the SSE transport.
+```
+docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=0xprivatekey -i sv/mcp-paradex-py
+```
+
 
 ## Smithery.ai Integration
 

@@ -4,7 +4,7 @@ Account management tools.
 from typing import Dict, Any
 
 from mcp_paradex.server.server import server
-from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client, api_call
+from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 
 @server.tool("paradex-account-summary")
 async def get_account_summary() -> Dict[str, Any]:

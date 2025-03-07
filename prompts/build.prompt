@@ -1,0 +1,329 @@
+Build an MCP server that:
+- Expose all functionality of Paradex API via MCP
+- Exposes GET endpoints as resources
+- Provides tools for executing PUT/POST/DELETE endpoints
+- Includes prompts for common trader questions
+
+
+Paradex information
+paradex docs - https://github.com/tradeparadex/paradex-docs
+paradex sdk - https://github.com/tradeparadex/paradex-py
+paradex samples -  https://github.com/tradeparadex/code-samples
+Swagger API spec - https://api.prod.paradex.trade/swagger/doc.json
+
+
+Model Context Protocol (MCP) information 
+MCP - https://modelcontextprotocol.io/llms-full.txt
+MCP Python SDK - https://github.com/modelcontextprotocol/python-sdk/blob/main/README.md
+
+Additional requirements
+Have support of smithery.ai - https://smithery.ai/docs
+Examples of MCP servers - https://github.com/modelcontextprotocol/servers/tree/main/src
+
+After each step update README.md if required.
+
+# Project Overview
+
+This project aims to build a Model Context Protocol (MCP) server that integrates with Paradex, a high-performance decentralized exchange for perpetual futures trading. The MCP server will allow AI assistants like Claude to interact with Paradex's trading API, enabling users to perform trading operations, retrieve market data, and manage their accounts through natural language interactions.
+
+# What We Know
+
+## About MCP (Model Context Protocol)
+- MCP is an open standard created by Anthropic for connecting AI models with external data sources
+- The Python SDK (v1.3.0+) provides a complete implementation of the protocol
+- MCP operates with three core primitives:
+  - **Resources**: Read-only data sources (similar to GET endpoints)
+  - **Tools**: Actionable functions that perform operations (similar to POST endpoints)
+  - **Prompts**: Reusable templates for LLM interactions
+- FastMCP class provides high-level abstractions for building servers quickly
+- MCP servers can be installed directly in Claude Desktop for testing
+- Standard transports include stdio and SSE
+- Authentication and security controls are built into the protocol
+
+## About Paradex
+- Paradex is a high-performance decentralized exchange (DEX) built on a Layer 2 network
+- Focuses on perpetual futures trading with self-custody of assets
+- Provides a comprehensive Python SDK (paradex-py) for API integration
+- API features include:
+  - Market data retrieval (prices, orderbook, etc.)
+  - Account management
+  - Order placement and management
+  - Position management
+  - WebSocket support for real-time data
+- Supports both mainnet and testnet environments
+- Authentication uses API keys with L1/L2 address verification
+- Has specific rate limiting and security requirements
+
+# Refined Plan
+
+## Phase 1: Infrastructure Setup (Week 1)
+1. Set up project structure using MCP Python SDK patterns
+   - Initialize FastMCP server with proper capabilities
+   - Set up async event handling structure
+   - Configure server metadata and capabilities declaration
+2. Configure Paradex client integration
+   - Implement testnet environment setup
+   - Create authentication layer for API keys
+   - Set up WebSocket client initialization
+3. Implement basic health and connectivity tools
+   - System status check tool
+   - Connection verification resources
+   - API documentation resources
+4. Set up testing framework
+   - Unit testing with pytest
+   - Integration testing with MCP test fixtures
+   - Mock Paradex API responses for testing
+
+## Phase 2: Core Paradex Data Resources (Week 2)
+1. Market data resources
+   - Implement `market://summary` resource for overall market view
+   - Create `market://{symbol}/price` for specific market prices
+   - Develop `market://{symbol}/orderbook` for order book depth
+   - Build `market://{symbol}/recent-trades` for trade history
+2. Account information resources
+   - Build `account://balance` for wallet balance information
+   - Create `account://positions` for open positions
+   - Implement `account://orders` for order history
+3. Reference data resources
+   - Trading pairs and contract specifications
+   - Fee schedules and trading limits
+   - Risk parameters and margin requirements
+4. Basic system configuration tools
+   - Environment selection tool (testnet/mainnet)
+   - Connection management
+   - Rate limit status
+
+## Phase 3: Trading and Account Tools (Week 3)
+1. Authentication tools
+   - Implement secure API key storage and retrieval
+   - Add wallet connection tools
+   - Create session management functionality
+2. Order management tools
+   - Build `place_order` tool with market/limit/stop types
+   - Implement `cancel_order` and `modify_order` tools
+   - Create `cancel_all_orders` utility
+3. Position management tools
+   - Develop position size adjustment tools
+   - Implement leverage modification
+   - Create risk management tools (stop-loss, take-profit)
+4. Market analysis tools
+   - Price analysis utilities
+   - Market trend identification
+   - Risk assessment calculators
+
+## Phase 4: Advanced Features and Integration (Week 4)
+1. Real-time data streaming
+   - WebSocket integration for price updates
+   - Order status change notifications
+   - Position update alerts
+2. Trading strategy tools
+   - Basic strategy implementation templates
+   - Backtesting utilities
+   - Performance analysis tools
+3. Enhanced security features
+   - Transaction confirmation prompts
+   - Risk warning templates
+   - Security verification steps
+4. Documentation and examples
+   - API documentation resources
+   - Usage examples and templates
+   - Error handling guidelines
+
+## Phase 5: Testing, Optimization and Deployment (Week 5)
+1. Comprehensive testing
+   - End-to-end testing with testnet
+   - Security testing
+   - Performance testing under load
+2. Optimization
+   - Response time improvements
+   - Caching strategies implementation
+   - Memory and CPU usage optimization
+3. Deployment preparation
+   - Packaging for distribution
+   - Environment configuration management
+   - CI/CD pipeline setup
+4. Documentation finalization
+   - User documentation
+   - Developer documentation
+   - Installation and configuration guides
+
+# Implementation Details
+
+## Core Components Architecture
+1. **Server Module**
+   - FastMCP server configuration
+   - Protocol handling
+   - Capability management
+   - Transport configuration
+
+2. **Paradex Client Module**
+   - API client implementation
+   - WebSocket client
+   - Authentication management
+   - Rate limiting handling
+
+3. **Resource Handlers**
+   - Market data resources
+   - Account information resources
+   - Reference data resources
+   - Dynamic resource template system
+
+4. **Tool Implementations**
+   - Order management tools
+   - Position management tools
+   - Account tools
+   - Analysis tools
+
+5. **Prompts Library**
+   - Market analysis templates
+   - Trading decision templates
+   - Risk assessment templates
+   - Configuration templates
+
+6. **Security Layer**
+   - API key management
+   - Input validation
+   - Permission management
+   - Audit logging
+
+7. **Utility Services**
+   - Caching service
+   - Logging service
+   - Error handling service
+   - Rate limit management
+
+# Technical Specifics
+
+## MCP Server Implementation
+```python
+from mcp.server.fastmcp import FastMCP
+
+# Create MCP server instance
+paradex_mcp = FastMCP("Paradex Trading")
+
+# Market data resource example
+@paradex_mcp.resource("market://{symbol}/price")
+async def get_market_price(symbol: str) -> str:
+    """Get current price for a market symbol"""
+    # Implementation using Paradex SDK
+    return f"Current price data for {symbol}"
+
+# Order placement tool example
+@paradex_mcp.tool()
+async def place_order(symbol: str, side: str, order_type: str, 
+                     quantity: float, price: float = None) -> str:
+    """Place an order on Paradex"""
+    # Implementation using Paradex SDK
+    return f"Order placed for {quantity} {symbol}"
+```
+
+## Paradex Integration
+```python
+from paradex_py import Paradex
+from paradex_py.environment import Environment
+
+# Paradex client initialization
+async def initialize_paradex_client(l1_address, l1_private_key, environment=Environment.TESTNET):
+    """Initialize Paradex client with authentication"""
+    paradex = Paradex(env=environment, 
+                     l1_address=l1_address, 
+                     l1_private_key=l1_private_key)
+    return paradex
+
+# Market data retrieval example
+async def fetch_market_data(paradex_client, symbol):
+    """Fetch market data for a symbol"""
+    market_data = await paradex_client.api_client.fetch_market_summary(symbol)
+    return market_data
+```
+
+# Updated Outstanding Gaps and Requirements
+
+1. **Authentication and Key Management**:
+   - Need to develop a secure method for storing and managing Paradex API keys
+   - Consider using environment variables, secure vaults, or encryption
+   - Determine if keys will be provided per user or use a service account
+   - SOLUTION APPROACH: Implement a secure key manager with encryption at rest
+
+2. **Environment Configuration**:
+   - Need configuration system for switching between testnet and mainnet
+   - Must handle different endpoints and behavior between environments
+   - SOLUTION APPROACH: Create environment-specific configuration classes
+
+3. **Rate Limiting Strategy**:
+   - Paradex API has specific rate limits that must be respected
+   - Need to implement client-side rate limiting to prevent API rejections
+   - SOLUTION APPROACH: Implement token bucket algorithm for rate limiting
+
+4. **Error Handling Framework**:
+   - Need to translate between Paradex API errors and MCP protocol errors
+   - Must provide meaningful error messages to users
+   - SOLUTION APPROACH: Create error mapping system with custom exception types
+
+5. **Data Freshness and Caching**:
+   - Determine appropriate TTL for different types of market data
+   - Implement efficient caching to reduce API calls
+   - SOLUTION APPROACH: Use tiered caching with different expiration times based on data type
+
+6. **WebSocket Integration**:
+   - Need to handle WebSocket reconnection and error scenarios
+   - Must manage multiple subscriptions efficiently
+   - SOLUTION APPROACH: Implement a robust WebSocket manager with heartbeat monitoring
+
+7. **Transaction Safety**:
+   - Ensure trading operations have appropriate confirmation steps
+   - Implement risk checks before executing trades
+   - SOLUTION APPROACH: Add confirmation prompts and risk assessment tools
+
+8. **Testing with Real Markets**:
+   - Need to develop testing strategy that doesn't risk real funds
+   - Must validate behavior in production-like environment
+   - SOLUTION APPROACH: Create a comprehensive testnet testing suite
+
+9. **User Feedback and Iteration**:
+   - Plan for collecting user feedback on the integration
+   - Establish process for rapidly iterating based on feedback
+   - SOLUTION APPROACH: Implement usage analytics and feedback collection
+
+10. **Performance Optimization**:
+    - Identify potential bottlenecks in the integration
+    - Optimize for low-latency response times
+    - SOLUTION APPROACH: Implement performance profiling and benchmarking tools
+
+11. **Smithery.ai Integration**:
+    - Need to make the server compatible with Smithery.ai platform
+    - Must provide proper metadata and configuration for Smithery.ai registry
+    - SOLUTION APPROACH: Add Smithery.ai configuration and deployment support
+
+# Immediate Next Steps
+
+1. ✅ **Create Basic Project Structure**
+   - Initialize project with proper directory structure
+   - Set up package configuration and dependencies
+   - Create initial FastMCP server configuration
+
+2. **Implement Authentication Layer**
+   - Design secure API key management system
+   - Create authentication flow for Paradex API
+   - Build testing harness for authentication
+
+3. ✅ **Deploy Basic Server with Health Check**
+   - Implement system status resource
+   - Create connectivity verification tool
+   - Test basic server functionality
+
+4. **Begin Market Data Integration**
+   - Implement first market data resources
+   - Create caching layer for market data
+   - Test data retrieval and formatting
+
+5. **Set Up Testing Environment**
+   - Configure testnet access
+   - Create mock data for testing
+   - Implement initial test cases
+
+6. ✅ **Add Smithery.ai Support**
+   - Create Smithery.ai configuration file
+   - Add server metadata for Smithery.ai registry
+   - Implement Claude Desktop configuration examples
+   - Document Smithery.ai integration in README

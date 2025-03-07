@@ -1,0 +1,100 @@
+{
+  "name": "mcp-paradex",
+  "displayName": "Paradex Trading",
+  "description": "MCP server for Paradex trading platform integration, enabling AI assistants to access market data and execute trades on the Paradex perpetual futures exchange.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": {
+    "name": "MCP Paradex Team"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mcp-paradex"
+  },
+  "keywords": [
+    "mcp",
+    "paradex",
+    "trading",
+    "crypto",
+    "perpetual",
+    "futures",
+    "exchange",
+    "defi"
+  ],
+  "categories": [
+    "finance",
+    "trading",
+    "crypto"
+  ],
+  "capabilities": {
+    "resources": [
+      "system://status",
+      "system://version",
+      "system://health",
+      "market://public/markets",
+      "market://public/info",
+      "market://{symbol}/price",
+      "market://{symbol}/orderbook",
+      "account://balance",
+      "account://positions",
+      "account://orders"
+    ],
+    "tools": [
+      "check_public_api",
+      "check_paradex_connection",
+      "place_order",
+      "cancel_order",
+      "modify_order"
+    ],
+    "system": {
+      "health": {
+        "description": "Check the health of the Paradex server"
+      }
+    },
+    "market": {
+      "list": {
+        "description": "List available markets on Paradex"
+      },
+      "get": {
+        "description": "Get details for a specific market",
+        "parameters": {
+          "market_id": {
+            "type": "string",
+            "description": "The ID of the market to retrieve"
+          }
+        }
+      }
+    }
+  },
+  "resources": {
+    "system": {
+      "health": {
+        "description": "Health status of the Paradex server"
+      }
+    },
+    "market": {
+      "list": {
+        "description": "List of available markets on Paradex"
+      },
+      "details": {
+        "description": "Detailed information about a specific market"
+      }
+    }
+  },
+  "installation": {
+    "claude_desktop": {
+      "command": "uvx",
+      "arguments": ["--with-editable", ".", "mcp-paradex"],
+      "environment": {
+        "PARADEX_ENVIRONMENT": "testnet"
+      }
+    }
+  },
+  "requirements": {
+    "authentication": {
+      "required": true,
+      "description": "Requires Paradex API credentials (L1 wallet address and private key) for authenticated operations."
+    },
+    "local": true
+  }
+} 

@@ -1,0 +1,21 @@
+Build an MCP server that:
+- Expose all functionality of Paradex API via MCP
+- Exposes GET endpoints as resources
+- Provides tools for executing PUT/POST/DELETE endpoints
+- Includes prompts for common trader questions
+
+
+Paradex information
+paradex docs - https://github.com/tradeparadex/paradex-docs
+paradex sdk - https://github.com/tradeparadex/paradex-py
+paradex samples -  https://github.com/tradeparadex/code-samples
+Swagger API spec - https://api.prod.paradex.trade/swagger/doc.json
+
+
+Model Context Protocol (MCP) information 
+MCP - https://modelcontextprotocol.io/llms-full.txt
+MCP Python SDK - https://github.com/modelcontextprotocol/python-sdk/blob/main/README.md
+
+Additional requirements
+Have support of smithery.ai - https://smithery.ai/docs
+Examples of MCP servers - https://github.com/modelcontextprotocol/servers/tree/main/src

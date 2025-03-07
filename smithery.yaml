@@ -1,0 +1,37 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - paradexL1Address
+      - paradexL1PrivateKey
+    properties:
+      paradexEnvironment:
+        type: string
+        default: testnet
+        description: The Paradex environment to use (e.g. testnet or mainnet).
+      paradexL1Address:
+        type: string
+        description: Your Ethereum L1 wallet address.
+      paradexL1PrivateKey:
+        type: string
+        description: Your Ethereum L1 private key.
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: 'mcp-paradex',
+      args: ['--transport', 'stdio'],
+      env: {
+        'PARADEX_ENVIRONMENT': config.paradexEnvironment,
+        'PARADEX_L1_ADDRESS': config.paradexL1Address,
+        'PARADEX_L1_PRIVATE_KEY': config.paradexL1PrivateKey
+      }
+    })
+  exampleConfig:
+    paradexEnvironment: testnet
+    paradexL1Address: "0x1234567890abcdef1234567890abcdef12345678"
+    paradexL1PrivateKey: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890

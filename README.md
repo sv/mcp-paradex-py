@@ -1,5 +1,7 @@
 # MCP Paradex Server
 
+[![smithery badge](https://smithery.ai/badge/@sv/mcp-paradex-py)](https://smithery.ai/server/@sv/mcp-paradex-py)
+
 Model Context Protocol (MCP) server implementation for the Paradex trading platform.
 
 ## Overview
@@ -18,6 +20,14 @@ This project provides a bridge between AI assistants (like Claude) and the Parad
 - Ethereum L1 wallet address and private key
 
 ## Installation
+
+### Installing via Smithery
+
+To install mcp-paradex-py for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@sv/mcp-paradex-py):
+
+```bash
+npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
+```
 
 ### Using pip
 

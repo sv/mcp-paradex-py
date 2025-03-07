@@ -57,7 +57,7 @@ def run_cli():
     parser.add_argument(
         "--transport", 
         choices=["stdio", "sse"], 
-        default="sse",
+        default="stdio",
         help="Transport to use (stdio or sse)"
     )
     parser.add_argument(

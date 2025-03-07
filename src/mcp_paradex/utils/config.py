@@ -23,10 +23,6 @@ class Config:
     
     # Paradex configuration
     ENVIRONMENT: Environment = Environment(os.getenv("PARADEX_ENVIRONMENT", "prod"))
-    
-    # Authentication
-    L1_ADDRESS: Optional[str] = os.getenv("PARADEX_L1_ADDRESS")
-    L1_PRIVATE_KEY: Optional[str] = os.getenv("PARADEX_L1_PRIVATE_KEY")
 
     PARADEX_ACCOUNT_ADDRESS: Optional[str] = os.getenv("PARADEX_ACCOUNT_ADDRESS")
     PARADEX_ACCOUNT_PRIVATE_KEY: Optional[str] = os.getenv("PARADEX_ACCOUNT_PRIVATE_KEY")
@@ -36,8 +32,7 @@ class Config:
     def is_configured(cls) -> bool:
         """Check if all required configuration is set."""
         return all([
-            cls.L1_ADDRESS is not None,
-            cls.L1_PRIVATE_KEY is not None,
+            cls.PARADEX_ACCOUNT_PRIVATE_KEY is not None,
         ])
 
 config = Config() 

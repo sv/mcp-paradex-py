@@ -28,7 +28,7 @@ async def system_status() -> Dict[str, Any]:
         },
         "paradex": {
             "environment": config.ENVIRONMENT.value,
-            "configured": config.is_configured(),
+            "auth_configured": config.is_configured(),
         }
     }
 

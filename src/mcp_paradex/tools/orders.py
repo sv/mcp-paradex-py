@@ -20,7 +20,7 @@ async def get_account_open_orders(
         Dict[str, Any]: Account orders.
     """
     client = await get_authenticated_paradex_client()
-    response = await client.fetch_orders(market_id)
+    response = client.fetch_orders(market_id)
     return response
 
 @server.tool("paradex-create-order")
@@ -52,9 +52,9 @@ async def create_order(
     Returns:
         Dict[str, Any]: Created order details.
     """
-    client = get_authenticated_paradex_client()
+    client = await get_authenticated_paradex_client()
     data = {k: v for k, v in locals().items() if v is not None and k != 'client'}
-    response = await client.post("/v1/orders", json=data)
+    response = client.submit_order(data)
     return response
 
 @server.tool("paradex-cancel-order")
@@ -68,8 +68,8 @@ async def cancel_order(order_id: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Cancelled order details.
     """
-    client = get_authenticated_paradex_client()
-    response = await client.cancel_order(order_id)
+    client = await get_authenticated_paradex_client()
+    response = client.cancel_order(order_id)
     return response
 
 @server.tool("paradex-cancel-all-orders")
@@ -84,7 +84,7 @@ async def cancel_all_orders(market_id: str = None) -> Dict[str, Any]:
         Dict[str, Any]: Result of cancellation.
     """
     client = await get_authenticated_paradex_client()
-    response = await client.cancel_all_orders(market_id)
+    response = client.cancel_all_orders(market_id)
     return response
 
 @server.tool("paradex-get-order-status")
@@ -99,5 +99,5 @@ async def get_order_status(order_id: str) -> Dict[str, Any]:
         Dict[str, Any]: Order details.
     """
     client = await get_authenticated_paradex_client()
-    response = await client.fetch_order(order_id)
+    response = client.fetch_order(order_id)
     return response 

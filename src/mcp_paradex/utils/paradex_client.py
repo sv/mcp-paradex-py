@@ -7,8 +7,6 @@ from typing import Optional, Dict, Any
 
 from paradex_py.api.api_client import ParadexApiClient
 from paradex_py.account.account import ParadexAccount
-from starknet_py.net.signer.stark_curve_signer import KeyPair
-from starknet_py.net.models import  parse_address
 
 
 from paradex_py.api.models import  SystemConfigSchema
@@ -57,6 +55,16 @@ async def get_paradex_client() -> ParadexApiClient:
             env=config.ENVIRONMENT.value,
             logger=logger
         )
+
+        if config.PARADEX_ACCOUNT_PRIVATE_KEY:
+            logger.info("Authenticating Paradex client")
+            response = _paradex_client.fetch_system_config()
+            acc = ParadexAccount(
+                config=response,
+                l1_address="0x0000000000000000000000000000000000000000",
+                l2_private_key=config.PARADEX_ACCOUNT_PRIVATE_KEY,
+            )
+            _paradex_client.init_account(acc)
     
         return _paradex_client
 
@@ -72,17 +80,7 @@ async def get_authenticated_paradex_client() -> ParadexApiClient:
     """
     client = await get_paradex_client()
     if client.account is None:
-        logger.info("Authenticating Paradex client")
-        config = api_call(client, "/system/config")
-        system_config = SystemConfigSchema().load(config, unknown="exclude", partial=True)
-        acc = ParadexAccount(
-            config=system_config,
-            l1_address="0x0",
-            l2_private_key=config.PARADEX_ACCOUNT_PRIVATE_KEY,
-        )
-        # acc.l2_address = parse_address(config.PARADEX_ACCOUNT_ADDRESS)
-        client.account = acc
-        client.auth()
+        raise ValueError("Paradex client is not authenticated")
     return client
 
 

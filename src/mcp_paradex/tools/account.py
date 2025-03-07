@@ -6,7 +6,7 @@ from typing import Dict, Any
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client, api_call
 
-@server.tool("paradex-account-info")
+@server.tool("paradex-account-summary")
 async def get_account_summary() -> Dict[str, Any]:
     """
     Get account summary.
@@ -15,7 +15,7 @@ async def get_account_summary() -> Dict[str, Any]:
         Dict[str, Any]: Account summary.
     """
     client = await get_authenticated_paradex_client()
-    response = await client.fetch_account_summary()
+    response = client.fetch_account_summary()
     return response
 
 @server.tool("paradex-account-positions")
@@ -27,7 +27,7 @@ async def get_account_positions() -> Dict[str, Any]:
         Dict[str, Any]: Account positions.
     """
     client = await get_authenticated_paradex_client()
-    response = await client.fetch_positions()
+    response = client.fetch_positions()
     return response
 
 @server.tool("paradex-account-fills")
@@ -53,7 +53,7 @@ async def get_account_fills(
         "start_at": start_unix_ms,
         "end_at": end_unix_ms
     }
-    response = await client.fetch_fills(params)
+    response = client.fetch_fills(params)
     return response
 
 @server.tool("paradex-account-funding-payments")
@@ -79,6 +79,6 @@ async def get_account_funding_payments(
         "start_at": start_unix_ms,
         "end_at": end_unix_ms
     }
-    response = await client.fetch_funding_payments(params)
+    response = client.fetch_funding_payments(params)
     return response
 

@@ -1,7 +1,6 @@
 """
 Market data resources that don't require authentication.
 """
-import json
 from typing import Dict, Any, List
 import logging
 from datetime import datetime

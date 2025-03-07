@@ -19,7 +19,7 @@ async def get_system_config() -> Dict[str, Any]:
         Dict[str, Any]: Global Paradex system configuration.
     """
     client = await get_paradex_client()
-    response = api_call(client, "/system/config")
+    response = api_call(client, "system/config")
     system_config = SystemConfigSchema().load(response, unknown="exclude", partial=True)
     base = {
         "exchange": "Paradex",

@@ -6,19 +6,15 @@ startCommand:
     # JSON Schema defining the configuration options for the MCP.
     type: object
     required:
-      - paradexL1Address
-      - paradexL1PrivateKey
+      - paradexAccountPrivateKey
     properties:
       paradexEnvironment:
         type: string
         default: testnet
-        description: The Paradex environment to use (e.g. testnet or mainnet).
-      paradexL1Address:
+        description: The Paradex environment to use (e.g. testnet or prod).
+      paradexAccountPrivateKey:
         type: string
-        description: Your Ethereum L1 wallet address.
-      paradexL1PrivateKey:
-        type: string
-        description: Your Ethereum L1 private key.
+        description: Your Paradex account private key.
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
@@ -27,11 +23,9 @@ startCommand:
       args: ['--transport', 'stdio'],
       env: {
         'PARADEX_ENVIRONMENT': config.paradexEnvironment,
-        'PARADEX_L1_ADDRESS': config.paradexL1Address,
-        'PARADEX_L1_PRIVATE_KEY': config.paradexL1PrivateKey
+        'PARADEX_ACCOUNT_PRIVATE_KEY': config.paradexAccountPrivateKey
       }
     })
   exampleConfig:
     paradexEnvironment: testnet
-    paradexL1Address: "0x1234567890abcdef1234567890abcdef12345678"
-    paradexL1PrivateKey: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+    paradexAccountPrivateKey: abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890

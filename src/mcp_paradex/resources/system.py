@@ -27,7 +27,7 @@ async def system_status() -> Dict[str, Any]:
             "timestamp": datetime.now().isoformat(),
         },
         "paradex": {
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "auth_configured": config.is_configured(),
         }
     }
@@ -96,11 +96,11 @@ async def get_system_config() -> Dict[str, Any]:
         Dict[str, Any]: Market information.
     """
     client = await get_paradex_client()
-    config = client.fetch_system_config()
+    syscfg = client.fetch_system_config()
     base = {
         "exchange": "Paradex",
         "timestamp": datetime.now().isoformat(),
-        "environment": config.ENVIRONMENT.value,
+        "environment": config.ENVIRONMENT,
         "status": "operational",
         "features": [
             "perpetual_futures",
@@ -111,7 +111,7 @@ async def get_system_config() -> Dict[str, Any]:
         "website": "https://paradex.trade/",
         "documentation": "https://github.com/tradeparadex/paradex-docs"
     } 
-    base.update(config.model_dump())
+    base.update(syscfg.model_dump())
     return base
 
 @server.resource("paradex://system/time")

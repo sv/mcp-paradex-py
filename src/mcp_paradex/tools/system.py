@@ -9,17 +9,20 @@ global parameters that affect trading operations.
 from typing import Dict, Any
 import logging
 from datetime import datetime
+from pydantic import Field
+
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_paradex_client, api_call
 from mcp_paradex.utils.config import config
 from paradex_py.api.models import SystemConfigSchema
+from mcp.server.fastmcp.server import Context
 
 logger = logging.getLogger(__name__)
 
 
 @server.tool("paradex-system-config")
-async def get_system_config() -> Dict[str, Any]:
+async def get_system_config(ctx: Context) -> Dict[str, Any]:
     """
     Get global Paradex system configuration.
     
@@ -49,7 +52,7 @@ async def get_system_config() -> Dict[str, Any]:
         base = {
             "exchange": "Paradex",
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "status": "operational",
             "features": [
                 "perpetual_futures",
@@ -67,13 +70,13 @@ async def get_system_config() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "config": None
         }
 
 @server.tool("paradex-system-time")
-async def get_system_time() -> Dict[str, Any]:
+async def get_system_time(ctx: Context) -> Dict[str, Any]:
     """
     Get the current Paradex server time.
     
@@ -103,13 +106,13 @@ async def get_system_time() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "server_time": None
         }
 
 @server.tool("paradex-system-state")
-async def get_system_state() -> Dict[str, Any]:
+async def get_system_state(ctx: Context) -> Dict[str, Any]:
     """
     Get the current Paradex system operational state.
     
@@ -140,7 +143,7 @@ async def get_system_state() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "state": None
         }

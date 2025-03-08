@@ -2,22 +2,30 @@
 Order management tools.
 """
 from decimal import Decimal
-from typing import Dict, Any
+from typing import Dict, Any, Literal
+from enum import Enum
+
+from pydantic import Field
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 from paradex_py.common.order import Order, OrderSide, OrderType
+from mcp.server.fastmcp.server import Context
+
+# Define allowed order types
+OrderTypeEnum = Literal["MARKET", "LIMIT", "STOP_LIMIT", "STOP_MARKET", "TAKE_PROFIT_LIMIT", "TAKE_PROFIT_MARKET", "STOP_LOSS_MARKET", "STOP_LOSS_LIMIT"]
+
+# Define allowed instruction types
+InstructionEnum = Literal["GTC", "IOC", "POST_ONLY"]
+OrderSideEnum = Literal["BUY", "SELL"]
 
 @server.tool("paradex-account-open-orders")
 async def get_account_open_orders(
-    market_id: str = None,
+    market_id: str = Field(default=None, description="Filter by market."),
+    ctx: Context = None
 ) -> Dict[str, Any]:
     """
-    Get account open orders.
-    
-    Args:
-        market_id (str, optional): Filter by market ID.
-        
+    Get account open orders.        
     Returns:
         Dict[str, Any]: Account orders.
     """
@@ -27,30 +35,20 @@ async def get_account_open_orders(
 
 @server.tool("paradex-create-order")
 async def create_order(
-    market_id: str,
-    order_side: str,
-    order_type: str,
-    size: float,
-    price: float = None,
-    client_id: str = None,
-    time_in_force: str = None,
-    post_only: bool = None,
-    reduce_only: bool = None
+    market_id: str = Field(description="Market identifier."),
+    order_side: OrderSideEnum = Field(description="Order side."),
+    order_type: OrderTypeEnum = Field(description="Order type."),
+    size: float = Field(description="Order size."),
+    price: float = Field(default=None, description="Order price (required for LIMIT orders)."),
+    trigger_price: float = Field(default=None, description="Trigger price (required for STOP_LIMIT orders)."),
+    client_id: str = Field(default=None, description="Client-specified order ID."),
+    instruction: InstructionEnum = Field(default="GTC", description="Instruction for order execution."),
+    reduce_only: bool = Field(default=False, description="Reduce-only flag."),
+    ctx: Context = None
 ) -> Dict[str, Any]:
     """
     Create a new order.
-    
-    Args:
-        market_id (str): Market identifier.
-        order_side (str): Order side (BUY/SELL).
-        order_type (str): Order type (LIMIT/MARKET).
-        size (float): Order size.
-        price (float, optional): Order price (required for LIMIT orders).
-        client_id (str, optional): Client-specified order ID.
-        time_in_force (str, optional): Time in force (GTC).
-        post_only (bool, optional): Post-only flag.
-        reduce_only (bool, optional): Reduce-only flag.
-        
+
     Returns:
         Dict[str, Any]: Created order details.
     """
@@ -60,49 +58,39 @@ async def create_order(
         order_side=OrderSide(order_side),
         order_type=OrderType(order_type),
         size=Decimal(str(size)),
+        client_id=client_id,
         limit_price=Decimal(str(price)) if price else Decimal(0),
+        reduce_only=reduce_only,
+        instruction=instruction,
+        trigger_price=Decimal(str(trigger_price)) if trigger_price else None
     )
     response = client.submit_order(o)
     return response
 
 @server.tool("paradex-cancel-order")
-async def cancel_order(order_id: str) -> Dict[str, Any]:
+async def cancel_order(order_id: str = Field(description="Order identifier."), ctx: Context = None) -> None:
     """
     Cancel an order.
-    
-    Args:
-        order_id (str): Order identifier.
         
     Returns:
         Dict[str, Any]: Cancelled order details.
     """
     client = await get_authenticated_paradex_client()
-    response = client.cancel_order(order_id)
-    return response
-
+    client.cancel_order(order_id)
+    
 @server.tool("paradex-cancel-all-orders")
-async def cancel_all_orders(market_id: str = None) -> Dict[str, Any]:
+async def cancel_all_orders(market_id: str = Field(default=None, description="Market identifier to cancel orders for."), ctx: Context = None) -> None:
     """
     Cancel all orders.
-    
-    Args:
-        market_id (str, optional): Market identifier to cancel orders for.
-        
-    Returns:
-        Dict[str, Any]: Result of cancellation.
     """
     client = await get_authenticated_paradex_client()
-    response = client.cancel_all_orders(market_id)
-    return response
+    client.cancel_all_orders(market_id)
 
 @server.tool("paradex-get-order-status")
-async def get_order_status(order_id: str) -> Dict[str, Any]:
+async def get_order_status(order_id: str = Field(description="Order identifier."), ctx: Context = None) -> Dict[str, Any]:
     """
     Get order status.
-    
-    Args:
-        order_id (str): Order identifier.
-        
+
     Returns:
         Dict[str, Any]: Order details.
     """

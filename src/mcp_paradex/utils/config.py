@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-class Environment(Enum):
+class Environment(str, Enum):
     """Trading environment options."""
     TESTNET = "testnet"
     PROD = "prod"

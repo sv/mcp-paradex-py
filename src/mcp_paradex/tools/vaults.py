@@ -9,6 +9,8 @@ positions, and transaction history.
 from typing import Dict, Any
 import logging
 from datetime import datetime
+from pydantic import Field
+
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
@@ -49,7 +51,7 @@ async def get_vault_list() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "vaults": vault_list,
             "count": len(vault_list)
         }
@@ -58,24 +60,20 @@ async def get_vault_list() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "vaults": [],
             "count": 0
         }
 
 @server.tool("paradex-vault-details")
-async def get_vault_details(vault_address: str) -> Dict[str, Any]:
+async def get_vault_details(vault_address: str = Field(description="The address of the vault to get details for.")) -> Dict[str, Any]:
     """
     Get detailed information about a specific vault.
     
     Retrieves comprehensive details about a specific vault identified by its address,
     including configuration, permissions, and other vault-specific parameters.
     
-    Args:
-        vault_address (str): The blockchain address of the vault to get details for.
-                            Example: "0x1234...abcd"
-        
     Returns:
         Dict[str, Any]: Detailed vault information with the following structure:
             - success (bool): Whether the request was successful
@@ -99,7 +97,7 @@ async def get_vault_details(vault_address: str) -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "vaults": response["results"],
             "count": len(response["results"])
         }
@@ -108,7 +106,7 @@ async def get_vault_details(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "vaults": [],
             "count": 0
@@ -146,7 +144,7 @@ async def get_vaults_config() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "config": response,
         }
     except Exception as e:
@@ -154,13 +152,13 @@ async def get_vaults_config() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "config": None
         }
 
 @server.tool("paradex-vault-balance")
-async def get_vault_balance(vault_address: str) -> Dict[str, Any]:
+async def get_vault_balance(vault_address: str = Field(description="The address of the vault to get balance for.")) -> Dict[str, Any]:
     """
     Get the current balance of a specific vault.
 
@@ -169,9 +167,6 @@ async def get_vault_balance(vault_address: str) -> Dict[str, Any]:
     This is essential for understanding the financial state of a vault
     before executing trades or withdrawals.
 
-    Args:
-        vault_address (str): The blockchain address of the vault to get balance for.
-                            Example: "0x1234...abcd"
         
     Returns:
         Dict[str, Any]: Balance information for the vault, including:
@@ -196,14 +191,14 @@ async def get_vault_balance(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "balance": None
         }
 
 
 @server.tool("paradex-vault-summary")
-async def get_vault_summary(vault_address: str) -> Dict[str, Any]:
+async def get_vault_summary(vault_address: str = Field(description="The address of the vault to get summary for.")) -> Dict[str, Any]:
     """
     Get a comprehensive summary of a specific vault.
     
@@ -211,10 +206,7 @@ async def get_vault_summary(vault_address: str) -> Dict[str, Any]:
     including balance, positions, recent activity, and performance metrics.
     This provides a high-level overview of the vault's current state.
     
-    Args:
-        vault_address (str): The blockchain address of the vault to get summary for.
-                            Example: "0x1234...abcd"
-        
+
     Returns:
         Dict[str, Any]: Summary information for the vault, including:
             - balance (Dict): Current balance information
@@ -238,14 +230,14 @@ async def get_vault_summary(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
     
 
 @server.tool("paradex-vault-transfers")
-async def get_vault_transfers(vault_address: str) -> Dict[str, Any]:
+async def get_vault_transfers(vault_address: str = Field(description="The address of the vault to get transfers for.")) -> Dict[str, Any]:
     """
     Get a list of deposit and withdrawal transfers for a specific vault.
 
@@ -253,10 +245,7 @@ async def get_vault_transfers(vault_address: str) -> Dict[str, Any]:
     including timestamps, amounts, transaction hashes, and status information.
     This is useful for auditing vault activity and tracking fund movements.
 
-    Args:
-        vault_address (str): The blockchain address of the vault to get transfers for.
-                            Example: "0x1234...abcd"
-        
+
     Returns:
         Dict[str, Any]: List of transfers for the vault, each containing:
             - id (str): Transfer ID
@@ -283,14 +272,14 @@ async def get_vault_transfers(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "transfers": None
         }
     
 
 @server.tool("paradex-vault-positions")
-async def get_vault_positions(vault_address: str) -> Dict[str, Any]:
+async def get_vault_positions(vault_address: str = Field(description="The address of the vault to get positions for.")) -> Dict[str, Any]:
     """
     Get a list of current trading positions for a specific vault.
     
@@ -298,10 +287,7 @@ async def get_vault_positions(vault_address: str) -> Dict[str, Any]:
     size, entry price, liquidation price, unrealized PnL, and other
     position-specific information.
     
-    Args:
-        vault_address (str): The blockchain address of the vault to get positions for.
-                            Example: "0x1234...abcd"
-        
+
     Returns:
         Dict[str, Any]: List of positions for the vault, each containing:
             - market_id (str): Market identifier (e.g., "ETH-PERP")
@@ -329,14 +315,14 @@ async def get_vault_positions(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "positions": None
         }
     
 
 @server.tool("paradex-vault-account-summary")
-async def get_vault_account_summary(vault_address: str) -> Dict[str, Any]:
+async def get_vault_account_summary(vault_address: str = Field(description="The address of the vault to get account summary for.")) -> Dict[str, Any]:
     """
     Get a summary of trading account information for a specific vault.
     
@@ -344,10 +330,7 @@ async def get_vault_account_summary(vault_address: str) -> Dict[str, Any]:
     a vault, including margin information, account health, risk metrics,
     and trading statistics.
     
-    Args:
-        vault_address (str): The blockchain address of the vault to get account summary for.
-                            Example: "0x1234...abcd"
-        
+
     Returns:
         Dict[str, Any]: Account summary information, including:
             - margin_ratio (float): Current margin ratio
@@ -376,7 +359,7 @@ async def get_vault_account_summary(vault_address: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "account_summary": None
         }

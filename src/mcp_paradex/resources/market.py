@@ -30,7 +30,7 @@ async def get_markets() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "markets": markets,
             "count": len(markets)
         }
@@ -39,7 +39,7 @@ async def get_markets() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "markets": [],
             "count": 0
@@ -70,7 +70,7 @@ async def get_market_summary(market_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }

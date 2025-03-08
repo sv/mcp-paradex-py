@@ -9,16 +9,20 @@ from typing import Dict, Any, Optional
 import logging
 from datetime import datetime
 from enum import Enum
+from pydantic import Field
+
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
+from mcp.server.fastmcp.server import Context
+
 from mcp_paradex.utils.paradex_client import get_paradex_client, api_call
 
 logger = logging.getLogger(__name__)
 
 
 @server.tool("paradex-market-names")
-async def get_market_names() -> Dict[str, Any]:
+async def get_market_names(ctx: Context) -> Dict[str, Any]:
     """
     Get a list of available markets from Paradex.
     
@@ -42,7 +46,7 @@ async def get_market_names() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "markets": markets,
             "count": len(markets)
         }
@@ -51,14 +55,14 @@ async def get_market_names() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "markets": [],
             "count": 0
         }
     
 @server.tool("paradex-market-details")
-async def get_market_details(market_id: str) -> Dict[str, Any]:
+async def get_market_details(market_id: str = Field(description="Market symbol to get details for."), ctx: Context = None) -> Dict[str, Any]:
     """
     Get detailed information about a specific market.
     
@@ -66,9 +70,7 @@ async def get_market_details(market_id: str) -> Dict[str, Any]:
     base and quote assets, tick size, minimum order size, and other
     trading parameters.
     
-    Args:
-        market_id (str): The market symbol to get details for (e.g., "ETH-PERP").
-        
+
     Returns:
         Dict[str, Any]: Detailed market information with the following structure:
             - success (bool): Whether the request was successful
@@ -85,7 +87,7 @@ async def get_market_details(market_id: str) -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "details": details["results"],
         }
     except Exception as e:
@@ -93,22 +95,19 @@ async def get_market_details(market_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "details": None,
         }
 
 @server.tool("paradex-market-summary")
-async def get_market_summary(market_id: str) -> Dict[str, Any]:
+async def get_market_summary(market_id: str = Field(description="Market symbol to get summary for."), ctx: Context = None) -> Dict[str, Any]:
     """
     Get a summary of market statistics and current state.
     
     Retrieves current market summary information including price, volume,
     24h change, and other key market metrics.
     
-    Args:
-        market_id (str): The market symbol to get summary for (e.g., "ETH-PERP").
-        
     Returns:
         Dict[str, Any]: Market summary information including:
             - Current price
@@ -134,7 +133,7 @@ async def get_market_summary(market_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
@@ -142,9 +141,9 @@ async def get_market_summary(market_id: str) -> Dict[str, Any]:
 
 @server.tool("paradex-funding-data")
 async def get_funding_data(
-    market_id: str, 
-    start_unix_ms: int, 
-    end_unix_ms: int
+    market_id: str = Field(description="Market symbol to get funding data for."), 
+    start_unix_ms: int = Field(description="Start time in unix milliseconds."), 
+    end_unix_ms: int = Field(description="End time in unix milliseconds.")
 ) -> Dict[str, Any]:
     """
     Get historical funding rate data for a perpetual market.
@@ -152,11 +151,7 @@ async def get_funding_data(
     Retrieves funding rate history for a specified time period, which is
     essential for understanding the cost of holding perpetual positions.
     
-    Args:
-        market_id (str): The market symbol to get funding data for (e.g., "ETH-PERP").
-        start_unix_ms (int): The start time in unix milliseconds.
-        end_unix_ms (int): The end time in unix milliseconds.
-        
+
     Returns:
         Dict[str, Any]: Historical funding rate data with timestamps.
             If an error occurs, returns:
@@ -180,24 +175,21 @@ async def get_funding_data(
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "funding_data": None
         }
 
 
 @server.tool("paradex-bbo")
-async def get_bbo(market_id: str) -> Dict[str, Any]:
+async def get_bbo(market_id: str = Field(description="Market symbol to get BBO for."), ctx: Context = None) -> Dict[str, Any]:
     """
     Get the Best Bid and Offer (BBO) for a market.
     
     Retrieves the current best bid and best offer (ask) prices and sizes
     for a specified market. This represents the tightest spread currently
     available.
-    
-    Args:
-        market_id (str): The market symbol to get BBO for (e.g., "ETH-PERP").
-        
+ 
     Returns:
         Dict[str, Any]: Best bid and offer information including:
             - bid price and size
@@ -220,7 +212,7 @@ async def get_bbo(market_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "bbo": None
         }
@@ -237,8 +229,9 @@ class OrderbookDepth(int, Enum):
 
 @server.tool("paradex-orderbook")
 async def get_orderbook(
-    market_id: str, 
-    depth: int = OrderbookDepth.MEDIUM
+    market_id: str = Field(description="Market symbol to get orderbook for."), 
+    depth: int = Field(default=OrderbookDepth.MEDIUM, description="The depth of the orderbook to retrieve."),
+    ctx: Context = None
 ) -> Dict[str, Any]:
     """
     Get the current orderbook for a market.
@@ -246,11 +239,7 @@ async def get_orderbook(
     Retrieves the current state of the orderbook for a specified market,
     showing bid and ask orders up to the requested depth.
     
-    Args:
-        market_id (str): The market symbol to get orderbook for (e.g., "ETH-PERP").
-        depth (int, optional): The depth of the orderbook to retrieve. 
-            Defaults to 10. Common values: 5, 10, 20, 50, 100.
-    
+
     Returns:
         Dict[str, Any]: Orderbook data including:
             - bids: List of [price, size] pairs
@@ -274,7 +263,7 @@ async def get_orderbook(
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "orderbook": None
         }
@@ -294,26 +283,17 @@ class KlineResolution(str, Enum):
 
 @server.tool("paradex-klines")
 async def get_klines(
-    market_id: str, 
-    resolution: KlineResolution = KlineResolution.ONE_MINUTE, 
-    start_unix_ms: Optional[int] = None, 
-    end_unix_ms: Optional[int] = None
+    market_id: str = Field(description="Market symbol to get klines for."), 
+    resolution: KlineResolution = Field(default=KlineResolution.ONE_MINUTE, description="The time resolution of the klines."), 
+    start_unix_ms: Optional[int] = Field(default=None, description="Start time in unix milliseconds."), 
+    end_unix_ms: Optional[int] = Field(default=None, description="End time in unix milliseconds."),
+    ctx: Context = None
 ) -> Dict[str, Any]:
     """
     Get candlestick (kline) data for a market.
     
     Retrieves historical price candlestick data for a specified market and time period.
     Each candlestick contains open, high, low, close prices and volume information.
-    
-    Args:
-        market_id (str): The market symbol to get klines for (e.g., "ETH-PERP").
-        resolution (str, optional): The time resolution of the klines. 
-            Valid values: "1", "3", "5", "15", "30", "60", "240", "1D" (minutes, except 1D = 1 day).
-            Defaults to "1" (1 minute).
-        start_unix_ms (int, optional): The start time in unix milliseconds.
-            If None, defaults to exchange-specific recent timeframe.
-        end_unix_ms (int, optional): The end time in unix milliseconds.
-            If None, defaults to current time.
     
     Returns:
         Dict[str, Any]: Candlestick data with the following structure for each candle:
@@ -345,7 +325,7 @@ async def get_klines(
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "klines": None
         }
@@ -353,22 +333,16 @@ async def get_klines(
 
 @server.tool("paradex-trades")
 async def get_trades(
-    market_id: str, 
-    start_unix_ms: Optional[int] = None, 
-    end_unix_ms: Optional[int] = None
+    market_id: str = Field(description="Market symbol to get trades for."), 
+    start_unix_ms: Optional[int] = Field(default=None, description="Start time in unix milliseconds."), 
+    end_unix_ms: Optional[int] = Field(default=None, description="End time in unix milliseconds."),
+    ctx: Context = None
 ) -> Dict[str, Any]:
     """
     Get recent trades for a market.
     
     Retrieves historical trade data for a specified market and time period.
     Each trade includes price, size, side (buy/sell), and timestamp information.
-    
-    Args:
-        market_id (str): The market symbol to get trades for (e.g., "ETH-PERP").
-        start_unix_ms (int, optional): The start time in unix milliseconds.
-            If None, defaults to exchange-specific recent timeframe.
-        end_unix_ms (int, optional): The end time in unix milliseconds.
-            If None, defaults to current time.
     
     Returns:
         Dict[str, Any]: List of trades with the following structure for each trade:
@@ -398,7 +372,7 @@ async def get_trades(
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "trades": None
         }

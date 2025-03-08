@@ -30,7 +30,7 @@ async def get_vaults() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "vaults": vaults,
             "count": len(vaults)
         }
@@ -39,7 +39,7 @@ async def get_vaults() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "vaults": [],
             "count": 0
@@ -65,7 +65,7 @@ async def get_vaults_config() -> Dict[str, Any]:
         return {
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "config": config,
         }
     except Exception as e:
@@ -73,7 +73,7 @@ async def get_vaults_config() -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "vaults": [],
             "count": 0
@@ -104,7 +104,7 @@ async def get_vault_balance(vault_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
@@ -135,7 +135,7 @@ async def get_vault_summary(vault_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
@@ -166,7 +166,7 @@ async def get_vault_transfers(vault_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
@@ -197,7 +197,7 @@ async def get_vault_positions(vault_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }
@@ -228,7 +228,7 @@ async def get_vault_account_summary(vault_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT.value,
+            "environment": config.ENVIRONMENT,
             "error": str(e),
             "summary": None
         }

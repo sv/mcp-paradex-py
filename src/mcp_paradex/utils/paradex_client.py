@@ -52,7 +52,7 @@ async def get_paradex_client() -> ParadexApiClient:
         #     l1_private_key=config.L1_PRIVATE_KEY
         # )
         _paradex_client = ParadexApiClient(
-            env=config.ENVIRONMENT.value,
+            env=config.ENVIRONMENT,
             logger=logger
         )
 

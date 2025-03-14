@@ -30,12 +30,14 @@ npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
 ### Using pip
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/sv/mcp-paradex-py.git
    cd mcp-paradex-py
    ```
 
 2. Create a virtual environment:
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -49,12 +51,14 @@ npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
 ### Using uv (faster alternative)
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/sv/mcp-paradex-py.git
    cd mcp-paradex-py
    ```
 
 2. Create a virtual environment:
+
    ```bash
    uv venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -68,9 +72,11 @@ npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
 ### Configuration
 
 Set up your configuration:
+
 ```bash
 cp .env.template .env
 ```
+
 Then edit the `.env` file with your Paradex credentials.
 
 ## Running the Server
@@ -95,7 +101,6 @@ Allow trading
 docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=0xprivatekey -i sv/mcp-paradex-py
 ```
 
-
 ## Smithery.ai Integration
 
 This MCP server is compatible with [Smithery.ai](https://smithery.ai/), a platform for discovering and deploying MCP servers.
@@ -116,7 +121,7 @@ To use this server with Claude Desktop via Smithery.ai:
       "args": ["--with-editable", ".", "mcp-paradex"],
       "env": {
         "PARADEX_ENVIRONMENT": "testnet",
-        "PARADEX_ACCOUNT_PRIVATE_KEY": "your_private_key",
+        "PARADEX_ACCOUNT_PRIVATE_KEY": "your_private_key"
       }
     }
   }
@@ -148,15 +153,18 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 ### Resources
 
 #### System Resources
+
 - `system://status` - Get the current status of the system and Paradex connection
 - `system://version` - Get detailed version information about the server and dependencies
 - `system://health` - Perform a basic health check of the server
 
 #### Market Resources
+
 - `market://public/markets` - Get a list of available markets from Paradex
 - `market://public/info` - Get general market information and status
 
 #### Vault Resources
+
 - `vaults://list` - List all vaults associated with the account
 - `vaults://balance` - Get the balance of a specific vault
 - `vaults://details` - Get detailed information about a vault
@@ -164,24 +172,29 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 ### Tools
 
 #### System Tools
+
 - `check_public_api` - Check the connection to Paradex public API without authentication
 - `check_paradex_connection` - Verify connectivity with Paradex API using authentication
 
 #### Market Tools
+
 - `get_market_data` - Retrieve detailed market data for a specific market
 - `get_orderbook` - Get the current orderbook for a market
 - `get_recent_trades` - Retrieve recent trades for a market
 
 #### Account Tools
+
 - `get_account_info` - Get information about the connected account
 - `get_account_balance` - Retrieve the account balance
 
 #### Order Tools
+
 - `place_order` - Place a new order on Paradex
 - `cancel_order` - Cancel an existing order
 - `get_order_status` - Check the status of an order
 
 #### Vault Tools
+
 - `create_vault` - Create a new vault
 - `deposit_to_vault` - Deposit funds into a vault
 - `withdraw_from_vault` - Withdraw funds from a vault
@@ -210,25 +223,30 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 ### Development Progress
 
 - [x] **Step 1:** Create Basic Project Structure
+
   - Set up package configuration and dependencies
   - Create initial FastMCP server configuration
   - Implement basic system health checks
 
 - [x] **Step 2:** Implement Authentication Layer
+
   - Design secure API key management system
   - Create authentication flow for Paradex API
 
 - [x] **Step 3:** Deploy Basic Server with Health Check
+
   - Implement system status resource
   - Create connectivity verification tool
   - Add public API endpoints that don't require authentication
 
 - [x] **Step 4:** Market Data Integration
+
   - Implement market data resources
   - Create market data tools
   - Add orderbook and trade history functionality
 
 - [x] **Step 5:** Account and Order Management
+
   - Implement account information resources
   - Create order management tools
   - Add vault management capabilities
@@ -237,6 +255,99 @@ For more information about publishing to Smithery.ai, see the [Smithery document
   - Create Smithery.ai configuration file
   - Add Claude Desktop configuration example
   - Document Smithery.ai integration
+
+### Code Quality Tools
+
+This project uses several tools to maintain code quality:
+
+- **Black**: Code formatter that enforces a consistent style
+- **Ruff**: Fast Python linter that combines functionality from multiple linting tools
+- **Mypy**: Static type checker for Python
+- **Pre-commit**: Git hook scripts to automate checks before commits
+
+### Setup Development Environment
+
+1. Install development dependencies:
+
+   ```bash
+   make install-dev
+   ```
+
+2. Format code:
+
+   ```bash
+   make format
+   ```
+
+3. Lint code:
+
+   ```bash
+   make lint
+   ```
+
+4. Type check:
+
+   ```bash
+   make typecheck
+   ```
+
+5. Run all checks:
+
+   ```bash
+   make check
+   ```
+
+6. Run pre-commit on all files:
+
+   ```bash
+   make pre-commit
+   ```
+
+7. Run tests:
+
+   ```bash
+   make test
+   ```
+
+8. Run tests with coverage report:
+   ```bash
+   make test-cov
+   ```
+
+### Testing
+
+This project uses pytest for testing. Tests are located in the `tests` directory.
+
+To run tests:
+
+```bash
+pytest
+```
+
+To run tests with coverage report:
+
+```bash
+pytest --cov=mcp_paradex --cov-report=html
+```
+
+This will generate an HTML coverage report in the `htmlcov` directory.
+
+### Pre-commit Hooks
+
+Pre-commit hooks are configured to run automatically on git commit. They include:
+
+- Trailing whitespace removal
+- End-of-file fixer
+- YAML/TOML syntax checking
+- Black formatting
+- Ruff linting
+- Mypy type checking
+
+To manually run all pre-commit hooks on all files:
+
+```bash
+pre-commit run --all-files
+```
 
 ### Contributing
 

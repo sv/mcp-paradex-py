@@ -2,11 +2,11 @@
 Account management tools.
 """
 
-from typing import Any
+from typing import Any, Optional
 
 from mcp.server.fastmcp.server import Context
 from paradex_py.api.models import AccountSummary
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
@@ -25,17 +25,59 @@ async def get_account_summary(ctx: Context) -> AccountSummary:
     return response
 
 
+class Position(BaseModel):
+    id: str
+    account: str
+    market: str
+    status: str
+    side: str
+    size: float
+    average_entry_price: float
+    average_entry_price_usd: float
+    average_exit_price: float
+    unrealized_pnl: float
+    unrealized_funding_pnl: float
+    cost: float
+    cost_usd: float
+    cached_funding_index: float
+    last_updated_at: int
+    last_fill_id: str
+    seq_no: int
+    liquidation_price: str = ""
+    leverage: float = 0
+    realized_positional_pnl: float = 0
+
+
+position_adapter = TypeAdapter(list[Position])
+
+
 @server.tool("paradex-account-positions")
-async def get_account_positions(ctx: Context) -> dict[str, Any]:
+async def get_account_positions(ctx: Context) -> list[Position]:
     """
     Get account positions.
-
-    Returns:
-        Dict[str, Any]: Account positions.
     """
     client = await get_authenticated_paradex_client()
     response = client.fetch_positions()
-    return response
+    positions = position_adapter.validate_python(response["results"])
+    return positions
+
+
+class Fill(BaseModel):
+    id: str
+    side: str
+    liquidity: str
+    market: str
+    order_id: str
+    price: float
+    size: float
+    fee: float
+    fee_currency: str
+    created_at: int
+    remaining_size: float
+    client_id: str
+    fill_type: str
+    realized_pnl: float
+    realized_funding: float
 
 
 @server.tool("paradex-account-fills")
@@ -44,17 +86,24 @@ async def get_account_fills(
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
     end_unix_ms: int = Field(description="End time in unix milliseconds."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[Fill]:
     """
     Get account fills.
-
-    Returns:
-        Dict: Account fills.
     """
     client = await get_authenticated_paradex_client()
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
     response = client.fetch_fills(params)
-    return response
+    fills = [Fill(**fill) for fill in response["results"]]
+    return fills
+
+
+class FundingPayment(BaseModel):
+    id: str
+    market: str
+    payment: float
+    index: float
+    fill_id: str
+    created_at: int
 
 
 @server.tool("paradex-account-funding-payments")
@@ -63,7 +112,7 @@ async def get_account_funding_payments(
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
     end_unix_ms: int = Field(description="End time in unix milliseconds."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[FundingPayment]:
     """
     Get account funding payments.
 
@@ -73,7 +122,19 @@ async def get_account_funding_payments(
     client = await get_authenticated_paradex_client()
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
     response = client.fetch_funding_payments(params)
-    return response
+    funding_payments = [
+        FundingPayment(**funding_payment) for funding_payment in response["results"]
+    ]
+    return funding_payments
+
+
+class Transaction(BaseModel):
+    id: str
+    type: str
+    hash: str
+    state: str
+    created_at: int
+    completed_at: int
 
 
 @server.tool("paradex-account-transactions")
@@ -83,7 +144,7 @@ async def get_account_transactions(
     end_unix_ms: int = Field(description="End time in unix milliseconds."),
     limit: int = Field(default=50, description="Maximum number of transactions to return."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[Transaction]:
     """
     Get account transaction history.
 
@@ -98,15 +159,6 @@ async def get_account_transactions(
     - Tracking deposits and withdrawals
     - Analyzing funding payments over time
 
-    Returns:
-        Dict[str, Any]: Transaction history with details including:
-            - transaction_id: Transaction identifier
-            - type: Transaction type
-            - amount: Transaction amount
-            - currency: Currency of the transaction
-            - timestamp: When the transaction occurred
-            - status: Status of the transaction
-            - details: Additional transaction-specific details
     """
     client = await get_authenticated_paradex_client()
     params = {
@@ -118,4 +170,5 @@ async def get_account_transactions(
     # Remove None values from params
     params = {k: v for k, v in params.items() if v is not None}
     response = client.fetch_transactions(params)
-    return response
+    transactions = [Transaction(**transaction) for transaction in response["results"]]
+    return transactions

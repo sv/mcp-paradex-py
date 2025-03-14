@@ -9,10 +9,10 @@ None of these tools require authentication.
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.fastmcp.server import Context
-from pydantic import Field
+from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
@@ -135,8 +135,8 @@ async def get_market_summaries(
     try:
         # Get market summary from Paradex
         client = await get_paradex_client()
-        response = client.fetch_markets_summary()
-        all_summaries = response["results"]
+        response = client.fetch_markets_summary(params={"market": "ALL"})
+        all_summaries: list[dict[str, Any]] = response["results"]
         if market_ids:
             summaries = [summary for summary in all_summaries if summary["symbol"] in market_ids]
         else:
@@ -193,44 +193,37 @@ async def get_funding_data(
         }
 
 
+class BBO(BaseModel):
+    market: str
+    seq_no: int
+    ask: float
+    ask_size: float
+    bid: float
+    bid_size: float
+    last_updated_at: int
+
+
 @server.tool("paradex-bbo")
 async def get_bbo(
     market_id: str = Field(description="Market symbol to get BBO for."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> BBO:
     """
     Get the Best Bid and Offer (BBO) for a market.
 
     Retrieves the current best bid and best offer (ask) prices and sizes
     for a specified market. This represents the tightest spread currently
     available.
-
-    Returns:
-        Dict[str, Any]: Best bid and offer information including:
-            - bid price and size
-            - ask price and size
-            - timestamp
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
     """
     try:
         # Get BBO from Paradex
         client = await get_paradex_client()
         response = client.fetch_bbo(market_id)
-        return response
+        bbo = BBO(**response)
+        return bbo
     except Exception as e:
         logger.error(f"Error fetching BBO for {market_id}: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "bbo": None,
-        }
+        raise e
 
 
 class OrderbookDepth(int, Enum):
@@ -287,27 +280,17 @@ async def get_orderbook(
         }
 
 
-class KlineResolution(str, Enum):
-    """Valid kline/candlestick resolutions."""
-
-    ONE_MINUTE = "1"
-    THREE_MINUTES = "3"
-    FIVE_MINUTES = "5"
-    FIFTEEN_MINUTES = "15"
-    THIRTY_MINUTES = "30"
-    ONE_HOUR = "60"
-    FOUR_HOURS = "240"
-    ONE_DAY = "1D"
+KLinesResolutionEnum = Literal["1", "3", "5", "15", "30", "60"]
 
 
 @server.tool("paradex-klines")
 async def get_klines(
     market_id: str = Field(description="Market symbol to get klines for."),
-    resolution: KlineResolution = Field(
-        default=KlineResolution.ONE_MINUTE, description="The time resolution of the klines."
+    resolution: KLinesResolutionEnum = Field(
+        default="1", description="The time resolution of the klines."
     ),
-    start_unix_ms: int | None = Field(default=None, description="Start time in unix milliseconds."),
-    end_unix_ms: int | None = Field(default=None, description="End time in unix milliseconds."),
+    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
+    end_unix_ms: int = Field(description="End time in unix milliseconds."),
     ctx: Context = None,
 ) -> dict[str, Any]:
     """
@@ -356,32 +339,32 @@ async def get_klines(
         }
 
 
+class Trade(BaseModel):
+    id: str
+    market: str
+    side: str
+    size: float
+    price: float
+    created_at: int
+    trade_type: str
+    timestamp: int
+
+
+trade_adapter = TypeAdapter(list[Trade])
+
+
 @server.tool("paradex-trades")
 async def get_trades(
     market_id: str = Field(description="Market symbol to get trades for."),
-    start_unix_ms: int | None = Field(default=None, description="Start time in unix milliseconds."),
-    end_unix_ms: int | None = Field(default=None, description="End time in unix milliseconds."),
+    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
+    end_unix_ms: int = Field(description="End time in unix milliseconds."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[Trade]:
     """
     Get recent trades for a market.
 
     Retrieves historical trade data for a specified market and time period.
     Each trade includes price, size, side (buy/sell), and timestamp information.
-
-    Returns:
-        Dict[str, Any]: List of trades with the following structure for each trade:
-            - id: Trade ID
-            - price: Execution price
-            - size: Trade size
-            - side: "buy" or "sell"
-            - timestamp: Time of execution
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
     """
     try:
         # Get trades from Paradex
@@ -389,13 +372,8 @@ async def get_trades(
         response = client.fetch_trades(
             params={"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
         )
-        return response["results"]
+        trades = trade_adapter.validate_python(response["results"])
+        return trades
     except Exception as e:
         logger.error(f"Error fetching trades for {market_id}: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "trades": None,
-        }
+        raise e

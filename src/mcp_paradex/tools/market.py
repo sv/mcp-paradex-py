@@ -14,6 +14,7 @@ from typing import Any, Literal
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
+from mcp_paradex.models import BBO, Trade
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
@@ -193,39 +194,6 @@ async def get_funding_data(
         }
 
 
-class BBO(BaseModel):
-    market: str
-    seq_no: int
-    ask: float
-    ask_size: float
-    bid: float
-    bid_size: float
-    last_updated_at: int
-
-
-@server.tool("paradex-bbo")
-async def get_bbo(
-    market_id: str = Field(description="Market symbol to get BBO for."),
-    ctx: Context = None,
-) -> BBO:
-    """
-    Get the Best Bid and Offer (BBO) for a market.
-
-    Retrieves the current best bid and best offer (ask) prices and sizes
-    for a specified market. This represents the tightest spread currently
-    available.
-    """
-    try:
-        # Get BBO from Paradex
-        client = await get_paradex_client()
-        response = client.fetch_bbo(market_id)
-        bbo = BBO(**response)
-        return bbo
-    except Exception as e:
-        logger.error(f"Error fetching BBO for {market_id}: {e!s}")
-        raise e
-
-
 class OrderbookDepth(int, Enum):
     """Valid orderbook depth values."""
 
@@ -280,19 +248,33 @@ async def get_orderbook(
         }
 
 
-KLinesResolutionEnum = Literal["1", "3", "5", "15", "30", "60"]
+KLinesResolutionEnum = Literal[1, 3, 5, 15, 30, 60]
+
+
+class OHLCV(BaseModel):
+    """OHLCV data for a market."""
+
+    timestamp: int
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
+
+ohlcv_adapter = TypeAdapter(list[OHLCV])
 
 
 @server.tool("paradex-klines")
 async def get_klines(
     market_id: str = Field(description="Market symbol to get klines for."),
     resolution: KLinesResolutionEnum = Field(
-        default="1", description="The time resolution of the klines."
+        default=1, description="The time resolution of the klines."
     ),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
     end_unix_ms: int = Field(description="End time in unix milliseconds."),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[OHLCV]:
     """
     Get candlestick (kline) data for a market.
 
@@ -300,7 +282,7 @@ async def get_klines(
     Each candlestick contains open, high, low, close prices and volume information.
 
     Returns:
-        Dict[str, Any]: Candlestick data with the following structure for each candle:
+        List[OHLCV]: Candlestick data with the following structure for each candle:
             - timestamp
             - open price
             - high price
@@ -322,32 +304,29 @@ async def get_klines(
             "markets/klines",
             params={
                 "symbol": market_id,
-                "resolution": resolution,
+                "resolution": str(resolution),
                 "start_at": start_unix_ms,
                 "end_at": end_unix_ms,
             },
         )
-        return response
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        list_of_ohlcv = [
+            OHLCV(
+                timestamp=result[0],
+                open=result[1],
+                high=result[2],
+                low=result[3],
+                close=result[4],
+                volume=result[5],
+            )
+            for result in results
+        ]
+        return list_of_ohlcv
     except Exception as e:
         logger.error(f"Error fetching klines for {market_id}: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "klines": None,
-        }
-
-
-class Trade(BaseModel):
-    id: str
-    market: str
-    side: str
-    size: float
-    price: float
-    created_at: int
-    trade_type: str
-    timestamp: int
+        raise e
 
 
 trade_adapter = TypeAdapter(list[Trade])
@@ -376,4 +355,27 @@ async def get_trades(
         return trades
     except Exception as e:
         logger.error(f"Error fetching trades for {market_id}: {e!s}")
+        raise e
+
+
+@server.tool("paradex-bbo")
+async def get_bbo(
+    market_id: str = Field(description="Market symbol to get BBO for."),
+    ctx: Context = None,
+) -> BBO:
+    """
+    Get the Best Bid and Offer (BBO) for a market.
+
+    Retrieves the current best bid and best offer (ask) prices and sizes
+    for a specified market. This represents the tightest spread currently
+    available.
+    """
+    try:
+        # Get BBO from Paradex
+        client = await get_paradex_client()
+        response = client.fetch_bbo(market_id)
+        bbo = BBO(**response)
+        return bbo
+    except Exception as e:
+        logger.error(f"Error fetching BBO for {market_id}: {e!s}")
         raise e

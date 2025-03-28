@@ -11,16 +11,12 @@ import logging
 
 from mcp.server.fastmcp.server import Context
 from paradex_py.api.models import SystemConfig, SystemConfigSchema
-from pydantic import BaseModel
 
+from mcp_paradex.models import SystemState
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 
 logger = logging.getLogger(__name__)
-
-
-class SystemState(BaseModel):
-    status: str
 
 
 @server.tool("paradex-system-config")
@@ -42,7 +38,7 @@ async def get_system_config(ctx: Context) -> SystemConfig:
         system_config = SystemConfigSchema().load(response, unknown="exclude", partial=True)
         return system_config
     except Exception as e:
-        logger.error(f"Error fetching system configuration: {str(e)}")
+        logger.error(f"Error fetching system configuration: {e!s}")
         raise e
 
 
@@ -56,7 +52,7 @@ async def get_system_time(ctx: Context) -> int:
         time = client.fetch_system_time()
         return time["server_time"]
     except Exception as e:
-        logger.error(f"Error fetching system time: {str(e)}")
+        logger.error(f"Error fetching system time: {e!s}")
         raise e
 
 
@@ -75,5 +71,5 @@ async def get_system_state(ctx: Context) -> SystemState:
         state = client.fetch_system_state()
         return SystemState(status=state["status"])
     except Exception as e:
-        logger.error(f"Error fetching system state: {str(e)}")
+        logger.error(f"Error fetching system state: {e!s}")
         raise e

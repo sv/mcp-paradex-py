@@ -1,9 +1,9 @@
 """
 Market data resources that don't require authentication.
 """
-from typing import Dict, Any, List
 import logging
 from datetime import datetime
+from typing import Any
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
@@ -12,7 +12,7 @@ from mcp_paradex.utils.paradex_client import get_paradex_client
 logger = logging.getLogger(__name__)
 
 @server.resource("paradex://markets")
-async def get_markets() -> Dict[str, Any]:
+async def get_markets() -> dict[str, Any]:
     """
     Get a list of available markets from Paradex.
     
@@ -25,7 +25,7 @@ async def get_markets() -> Dict[str, Any]:
     try:
         client = await get_paradex_client()
         markets = client.fetch_markets()
-        
+
         # Format the response
         return {
             "success": True,
@@ -35,7 +35,7 @@ async def get_markets() -> Dict[str, Any]:
             "count": len(markets)
         }
     except Exception as e:
-        logger.error(f"Error fetching markets: {str(e)}")
+        logger.error(f"Error fetching markets: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
@@ -46,7 +46,7 @@ async def get_markets() -> Dict[str, Any]:
         }
 
 @server.resource("paradex://market/summary/{market_id}")
-async def get_market_summary(market_id: str) -> Dict[str, Any]:
+async def get_market_summary(market_id: str) -> dict[str, Any]:
     """
     Get a summary of market information for a specific trading pair.
     
@@ -66,7 +66,7 @@ async def get_market_summary(market_id: str) -> Dict[str, Any]:
         summary = client.fetch_markets_summary(params={"market": market_id})
         return summary
     except Exception as e:
-        logger.error(f"Error fetching market summary: {str(e)}")
+        logger.error(f"Error fetching market summary: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),

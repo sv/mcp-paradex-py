@@ -11,18 +11,27 @@ import logging
 from datetime import datetime
 from typing import Any, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, TypeAdapter
 
+from mcp_paradex.models import (
+    Position,
+    Vault,
+    VaultAccountSummary,
+    VaultBalance,
+    VaultStrategy,
+    VaultSummary,
+)
 from mcp_paradex.server.server import server
-from mcp_paradex.tools.account import Position
 from mcp_paradex.utils.config import config
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 
 logger = logging.getLogger(__name__)
 
+vault_strategy_adapter = TypeAdapter(list[VaultStrategy])
+
 
 @server.tool("paradex-vault-list")
-async def get_vault_list() -> Dict[str, Any]:
+async def get_vault_list() -> list[VaultStrategy]:
     """
     Get a list of available vaults from Paradex.
 
@@ -30,69 +39,27 @@ async def get_vault_list() -> Dict[str, Any]:
     This tool requires no parameters and returns a comprehensive list of
     all vaults that can be accessed on Paradex.
 
-    Returns:
-        Dict[str, Any]: List of available vaults with the following structure:
-            - success (bool): Whether the request was successful
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment (mainnet/testnet)
-            - vaults (List[Dict]): List of vault objects with address and name
-            - count (int): Total number of vaults
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - vaults (List): Empty list
-            - count (int): 0
     """
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults")
-
-        vault_list = [
-            {"address": vault["address"], "name": vault["name"]} for vault in response["results"]
-        ]
-        return {
-            "success": True,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "vaults": vault_list,
-            "count": len(vault_list),
-        }
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        vault_list = vault_strategy_adapter.validate_python(results)
+        return vault_list
     except Exception as e:
-        logger.error(f"Error fetching vaults: {str(e)}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "vaults": [],
-            "count": 0,
-        }
+        logger.error(f"Error fetching vaults: {e!s}")
+        raise e
 
 
-class Vault(BaseModel):
-    address: str
-    name: str
-    description: str
-    owner_account: str
-    operator_account: str
-    strategies: list[str]
-    token_address: str
-    status: str
-    kind: str
-    profit_share: int
-    lockup_period: int
-    max_tvl: int
-    created_at: int
-    last_updated_at: int
+vault_adapter = TypeAdapter(list[Vault])
 
 
 @server.tool("paradex-vault-details")
 async def get_vault_details(
     vault_address: str = Field(description="The address of the vault to get details for."),
-) -> Vault:
+) -> list[Vault]:
     """
     Get detailed information about a specific vault.
 
@@ -103,73 +70,54 @@ async def get_vault_details(
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults", params={"address": vault_address})
-        vault = Vault(**response["results"])
-        return vault
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        vaults = vault_adapter.validate_python(results)
+        return vaults
     except Exception as e:
-        logger.error(f"Error fetching vault details for {vault_address}: {str(e)}")
+        logger.error(f"Error fetching vault details for {vault_address}: {e!s}")
         raise e
 
 
+class VaultConfig(BaseModel):
+    """Vault configuration model."""
+
+    vault_factory_address: str
+    max_profit_share_percentage: str
+    min_lockup_period_days: str
+    max_lockup_period_days: str
+    min_initial_deposit: str
+    min_owner_share_percentage: str
+
+
 @server.tool("paradex-vaults-config")
-async def get_vaults_config() -> Dict[str, Any]:
+async def get_vaults_config() -> VaultConfig:
     """
     Get global configuration for vaults from Paradex.
 
     Retrieves system-wide configuration parameters for vaults on Paradex,
     including fee structures, limits, and other global settings that apply
     to all vaults on the platform.
-
-    Returns:
-        Dict[str, Any]: Global vault configuration with the following structure:
-            - success (bool): Whether the request was successful
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment (mainnet/testnet)
-            - config (Dict): Global vault configuration parameters
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - config (None): Null value for config
     """
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults/config")
+        config = VaultConfig.validate_python(response)
+        return config
 
-        # Format the response
-        return {
-            "success": True,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "config": response,
-        }
     except Exception as e:
-        logger.error(f"Error fetching vaults configuration: {str(e)}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "config": None,
-        }
+        logger.error(f"Error fetching vaults configuration: {e!s}")
+        raise e
 
 
-# # {
-#             "token": "USDC",
-#             "size": "6285318.024264880744",
-#             "last_updated_at": 1741934596912
-#         }
-class VaultBalance(BaseModel):
-    token: str
-    size: str
-    last_updated_at: int
+vault_balance_adapter = TypeAdapter(list[VaultBalance])
 
 
 @server.tool("paradex-vault-balance")
 async def get_vault_balance(
     vault_address: str = Field(description="The address of the vault to get balance for."),
-) -> VaultBalance:
+) -> list[VaultBalance]:
     """
     Get the current balance of a specific vault.
 
@@ -182,64 +130,17 @@ async def get_vault_balance(
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults/balance", params={"address": vault_address})
-        balance = VaultBalance(**response["results"])
-        return balance
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        balances = vault_balance_adapter.validate_python(results)
+        return balances
     except Exception as e:
-        logger.error(f"Error fetching balance for vault {vault_address}: {str(e)}")
+        logger.error(f"Error fetching balance for vault {vault_address}: {e!s}")
         raise e
 
 
-# {
-#             "address": "0x5f43c92dbe4e995115f351254407e7e84abf04cbe32a536345b9d6c36bc750f",
-#             "owner_equity": "0.03076589",
-#             "vtoken_supply": "12078498.10694",
-#             "vtoken_price": "1.15894902",
-#             "tvl": "13364818.6746007135",
-#             "net_deposits": "13364818.6746007135",
-#             "total_roi": "0.15905034",
-#             "roi_24h": "-0.0004581",
-#             "roi_7d": "0.00381278",
-#             "roi_30d": "0.01666131",
-#             "last_month_return": "0.20271261",
-#             "total_pnl": "1012499.53",
-#             "pnl_24h": "-6446.71",
-#             "pnl_7d": "53575.37",
-#             "pnl_30d": "233007.25",
-#             "max_drawdown": "0.1880607",
-#             "max_drawdown_24h": "0.00066735",
-#             "max_drawdown_7d": "0.00131604",
-#             "max_drawdown_30d": "0.1880607",
-#             "volume": "3288225640.29",
-#             "volume_24h": "3.196488724e+07",
-#             "volume_7d": "2.6373742904e+08",
-#             "volume_30d": "1.83300332466e+09",
-#             "num_depositors": 1278
-#         }
-class VaultSummary(BaseModel):
-    address: str
-    owner_equity: str
-    vtoken_supply: str
-    vtoken_price: str
-    tvl: str
-    net_deposits: str
-    total_roi: str
-    roi_24h: str
-    roi_7d: str
-    roi_30d: str
-    last_month_return: str
-    total_pnl: str
-    pnl_24h: str
-    pnl_7d: str
-    pnl_30d: str
-    max_drawdown: str
-    max_drawdown_24h: str
-    max_drawdown_7d: str
-    max_drawdown_30d: str
-    volume: str
-    volume_24h: str
-    volume_7d: str
-    volume_30d: str
-    num_depositors: int
+vault_summary_adapter = TypeAdapter(list[VaultSummary])
 
 
 @server.tool("paradex-vault-summary")
@@ -256,10 +157,13 @@ async def get_vault_summary(
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults/summary", params={"address": vault_address})
-        summary = VaultSummary(**response["results"])
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        summary = vault_summary_adapter.validate_python(results)
         return summary
     except Exception as e:
-        logger.error(f"Error fetching summary for vault {vault_address}: {str(e)}")
+        logger.error(f"Error fetching summary for vault {vault_address}: {e!s}")
         raise e
 
 
@@ -297,7 +201,7 @@ async def get_vault_transfers(
         response = await api_call(client, "vaults/transfers", params={"address": vault_address})
         return response["results"]
     except Exception as e:
-        logger.error(f"Error fetching transfers for vault {vault_address}: {str(e)}")
+        logger.error(f"Error fetching transfers for vault {vault_address}: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
@@ -305,6 +209,9 @@ async def get_vault_transfers(
             "error": str(e),
             "transfers": None,
         }
+
+
+position_adapter = TypeAdapter(list[Position])
 
 
 @server.tool("paradex-vault-positions")
@@ -321,26 +228,20 @@ async def get_vault_positions(
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults/positions", params={"address": vault_address})
-        positions = [Position(**position) for position in response["results"]]
+        positions = position_adapter.validate_python(response["results"])
         return positions
     except Exception as e:
-        logger.error(f"Error fetching positions for vault {vault_address}: {str(e)}")
+        logger.error(f"Error fetching positions for vault {vault_address}: {e!s}")
         raise e
 
 
-class VaultAccountSummary(BaseModel):
-    address: str
-    deposited_amount: str
-    vtoken_amount: str
-    total_roi: str
-    total_pnl: str
-    created_at: int
+vault_account_summary_adapter = TypeAdapter(list[VaultAccountSummary])
 
 
 @server.tool("paradex-vault-account-summary")
 async def get_vault_account_summary(
     vault_address: str = Field(description="The address of the vault to get account summary for."),
-) -> VaultAccountSummary:
+) -> list[VaultAccountSummary]:
     """
     Get a summary of trading account information for a specific vault.
 
@@ -354,8 +255,11 @@ async def get_vault_account_summary(
         response = await api_call(
             client, "vaults/account-summary", params={"address": vault_address}
         )
-        summary = VaultAccountSummary(**response["results"])
+        if "error" in response:
+            raise Exception(response["error"])
+        results = response["results"]
+        summary = vault_account_summary_adapter.validate_python(results)
         return summary
     except Exception as e:
-        logger.error(f"Error fetching account summary for vault {vault_address}: {str(e)}")
+        logger.error(f"Error fetching account summary for vault {vault_address}: {e!s}")
         raise e

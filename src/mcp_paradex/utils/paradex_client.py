@@ -3,19 +3,17 @@ Paradex API client utilities.
 """
 import asyncio
 import logging
-from typing import Optional, Dict, Any
+from typing import Any
 
-from paradex_py.api.api_client import ParadexApiClient
 from paradex_py.account.account import ParadexAccount
+from paradex_py.api.api_client import ParadexApiClient
 
-
-from paradex_py.api.models import  SystemConfigSchema
 from mcp_paradex.utils.config import config
 
 logger = logging.getLogger(__name__)
 
 # Singleton instance of the Paradex client
-_paradex_client: Optional[ParadexApiClient] = None
+_paradex_client: ParadexApiClient | None = None
 _client_lock = asyncio.Lock()
 
 async def get_paradex_client() -> ParadexApiClient:
@@ -29,22 +27,22 @@ async def get_paradex_client() -> ParadexApiClient:
         ValueError: If the required configuration is not set.
     """
     global _paradex_client
-    
+
     if _paradex_client is not None:
         return _paradex_client
-    
+
     async with _client_lock:
         # Double-check in case another task initialized it while waiting
         if _paradex_client is not None:
             return _paradex_client
-        
+
         # if not config.is_configured():
             # raise ValueError(
             #     "Paradex client configuration is incomplete. "
             #     "Make sure L1_ADDRESS and L1_PRIVATE_KEY are set."
             # )
-            
-        
+
+
         # _paradex_client = Paradex(
         #     env=config.ENVIRONMENT,
         #     logger=logger,
@@ -65,7 +63,7 @@ async def get_paradex_client() -> ParadexApiClient:
                 l2_private_key=config.PARADEX_ACCOUNT_PRIVATE_KEY,
             )
             _paradex_client.init_account(acc)
-    
+
         return _paradex_client
 
 async def get_authenticated_paradex_client() -> ParadexApiClient:
@@ -84,7 +82,7 @@ async def get_authenticated_paradex_client() -> ParadexApiClient:
     return client
 
 
-async def api_call(client: ParadexApiClient, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+async def api_call(client: ParadexApiClient, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
     """
     Make a direct API call to Paradex.
     
@@ -100,6 +98,6 @@ async def api_call(client: ParadexApiClient, path: str, params: Optional[Dict[st
         logger.info(f"Calling {path} with params: {params}")
         response = client.get(client.api_url, path, params)
         return response
-    except Exception as e:
+    except Exception:
         logger.exception(f"Error calling {path}")
-        raise 
+        raise

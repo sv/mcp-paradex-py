@@ -1,18 +1,20 @@
 """
 System status and health check resources.
 """
-from typing import Dict, Any
-from datetime import datetime
-import pkg_resources
-import sys
 import os
+import sys
+from datetime import datetime
+from typing import Any
+
+import pkg_resources
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
 from mcp_paradex.utils.paradex_client import get_paradex_client
 
+
 @server.resource("system://status")
-async def system_status() -> Dict[str, Any]:
+async def system_status() -> dict[str, Any]:
     """
     Get the current system status.
     
@@ -33,7 +35,7 @@ async def system_status() -> Dict[str, Any]:
     }
 
 @server.resource("system://version")
-async def version_info() -> Dict[str, Any]:
+async def version_info() -> dict[str, Any]:
     """
     Get detailed version information about the server and its dependencies.
     
@@ -45,13 +47,13 @@ async def version_info() -> Dict[str, Any]:
         mcp_version = pkg_resources.get_distribution("mcp").version
     except pkg_resources.DistributionNotFound:
         mcp_version = "unknown"
-    
+
     # Get Paradex SDK version
     try:
         paradex_version = pkg_resources.get_distribution("paradex-py").version
     except pkg_resources.DistributionNotFound:
         paradex_version = "unknown"
-    
+
     return {
         "dependencies": {
             "mcp_sdk": mcp_version,
@@ -64,7 +66,7 @@ async def version_info() -> Dict[str, Any]:
     }
 
 @server.resource("system://health")
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Perform a basic health check of the server.
     
@@ -81,11 +83,11 @@ async def health_check() -> Dict[str, Any]:
             "server": "pass",
             "configuration": "pass" if config.SERVER_NAME else "fail",
         }
-    } 
+    }
 
 
 @server.resource("paradex://system/config")
-async def get_system_config() -> Dict[str, Any]:
+async def get_system_config() -> dict[str, Any]:
     """
     Get general market information and status.
     
@@ -110,12 +112,12 @@ async def get_system_config() -> Dict[str, Any]:
         "trading_hours": "24/7",
         "website": "https://paradex.trade/",
         "documentation": "https://github.com/tradeparadex/paradex-docs"
-    } 
+    }
     base.update(syscfg.model_dump())
     return base
 
 @server.resource("paradex://system/time")
-async def get_system_time() -> Dict[str, Any]:
+async def get_system_time() -> dict[str, Any]:
     """
     Get the current system time.
     
@@ -130,7 +132,7 @@ async def get_system_time() -> Dict[str, Any]:
     return time
 
 @server.resource("paradex://system/state")
-async def get_system_state() -> Dict[str, Any]:
+async def get_system_state() -> dict[str, Any]:
     """
     Get the current system state.
     

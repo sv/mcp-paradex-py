@@ -173,185 +173,54 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### System Tools
 
-- `check_public_api` - Check the connection to Paradex public API without authentication
-- `check_paradex_connection` - Verify connectivity with Paradex API using authentication
+- `paradex-system-config` - Get global Paradex system configuration
+- `paradex-system-time` - Get current Paradex server time
+- `paradex-system-state` - Get current system state
 
 #### Market Tools
 
-- `get_market_data` - Retrieve detailed market data for a specific market
-- `get_orderbook` - Get the current orderbook for a market
-- `get_recent_trades` - Retrieve recent trades for a market
+- `paradex-market-names` - Get a list of available markets from Paradex
+- `paradex-market-details` - Get detailed information about a specific market
+- `paradex-market-summaries` - Get summaries for all markets or a specific market
+- `paradex-funding-data` - Get funding rate data for a market
+- `paradex-orderbook` - Get the current orderbook for a market
+- `paradex-klines` - Get historical candlestick data for a market
+- `paradex-trades` - Get recent trades for a market
+- `paradex-bbo` - Get best bid and offer for a market
 
 #### Account Tools
 
-- `get_account_info` - Get information about the connected account
-- `get_account_balance` - Retrieve the account balance
+- `paradex-account-summary` - Get account summary information
+- `paradex-account-positions` - Get current account positions
+- `paradex-account-fills` - Get account trade fills
+- `paradex-account-funding-payments` - Get account funding payments
+- `paradex-account-transactions` - Get account transaction history
 
 #### Order Tools
 
-- `place_order` - Place a new order on Paradex
-- `cancel_order` - Cancel an existing order
-- `get_order_status` - Check the status of an order
+- `paradex-account-open-orders` - Get all open orders for an account
+- `paradex-create-order` - Create a new order on Paradex
+- `paradex-cancel-order` - Cancel an existing order
+- `paradex-cancel-order-by-client-id` - Cancel an order by client ID
+- `paradex-cancel-all-orders` - Cancel all open orders
+- `paradex-get-order-status` - Get the status of an order
+- `paradex-get-order-by-client-id` - Get order status by client ID
+- `paradex-get-orders-history` - Get historical orders for an account
 
 #### Vault Tools
 
-- `create_vault` - Create a new vault
-- `deposit_to_vault` - Deposit funds into a vault
-- `withdraw_from_vault` - Withdraw funds from a vault
+- `paradex-vault-list` - List all available vaults
+- `paradex-vault-details` - Get detailed information about a vault
+- `paradex-vaults-config` - Get vault configuration options
+- `paradex-vault-balance` - Get the balance of a vault
+- `paradex-vault-summary` - Get a summary of a vault's status
+- `paradex-vault-transfers` - Get transfer history for a vault
+- `paradex-vault-positions` - Get current positions in a vault
+- `paradex-vault-account-summary` - Get account summary for a vault
 
-## Development
+## Contributing
 
-### Project Structure
-
-- `src/mcp_paradex/` - Main package
-  - `server/` - MCP server implementation
-    - `server.py` - FastMCP server configuration
-  - `resources/` - Read-only data resources
-    - `system.py` - System status resource
-    - `market.py` - Market data resources
-    - `vaults.py` - Vault management resources
-  - `tools/` - Action tools for operations
-    - `system.py` - System management tools
-    - `market.py` - Market data tools
-    - `account.py` - Account management tools
-    - `orders.py` - Order management tools
-    - `vaults.py` - Vault management tools
-  - `utils/` - Utility functions and helpers
-    - `config.py` - Configuration handling
-    - `paradex_client.py` - Paradex API client
-
-### Development Progress
-
-- [x] **Step 1:** Create Basic Project Structure
-
-  - Set up package configuration and dependencies
-  - Create initial FastMCP server configuration
-  - Implement basic system health checks
-
-- [x] **Step 2:** Implement Authentication Layer
-
-  - Design secure API key management system
-  - Create authentication flow for Paradex API
-
-- [x] **Step 3:** Deploy Basic Server with Health Check
-
-  - Implement system status resource
-  - Create connectivity verification tool
-  - Add public API endpoints that don't require authentication
-
-- [x] **Step 4:** Market Data Integration
-
-  - Implement market data resources
-  - Create market data tools
-  - Add orderbook and trade history functionality
-
-- [x] **Step 5:** Account and Order Management
-
-  - Implement account information resources
-  - Create order management tools
-  - Add vault management capabilities
-
-- [x] **Step 6:** Add Smithery.ai Support
-  - Create Smithery.ai configuration file
-  - Add Claude Desktop configuration example
-  - Document Smithery.ai integration
-
-### Code Quality Tools
-
-This project uses several tools to maintain code quality:
-
-- **Black**: Code formatter that enforces a consistent style
-- **Ruff**: Fast Python linter that combines functionality from multiple linting tools
-- **Mypy**: Static type checker for Python
-- **Pre-commit**: Git hook scripts to automate checks before commits
-
-### Setup Development Environment
-
-1. Install development dependencies:
-
-   ```bash
-   make install-dev
-   ```
-
-2. Format code:
-
-   ```bash
-   make format
-   ```
-
-3. Lint code:
-
-   ```bash
-   make lint
-   ```
-
-4. Type check:
-
-   ```bash
-   make typecheck
-   ```
-
-5. Run all checks:
-
-   ```bash
-   make check
-   ```
-
-6. Run pre-commit on all files:
-
-   ```bash
-   make pre-commit
-   ```
-
-7. Run tests:
-
-   ```bash
-   make test
-   ```
-
-8. Run tests with coverage report:
-   ```bash
-   make test-cov
-   ```
-
-### Testing
-
-This project uses pytest for testing. Tests are located in the `tests` directory.
-
-To run tests:
-
-```bash
-pytest
-```
-
-To run tests with coverage report:
-
-```bash
-pytest --cov=mcp_paradex --cov-report=html
-```
-
-This will generate an HTML coverage report in the `htmlcov` directory.
-
-### Pre-commit Hooks
-
-Pre-commit hooks are configured to run automatically on git commit. They include:
-
-- Trailing whitespace removal
-- End-of-file fixer
-- YAML/TOML syntax checking
-- Black formatting
-- Ruff linting
-- Mypy type checking
-
-To manually run all pre-commit hooks on all files:
-
-```bash
-pre-commit run --all-files
-```
-
-### Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information on how to contribute to this project, development setup, and our coding standards.
 
 ## License
 

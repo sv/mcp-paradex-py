@@ -14,7 +14,7 @@ from typing import Any, Literal
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
-from mcp_paradex.models import BBO, Trade
+from mcp_paradex.models import BBO, MarketDetails, MarketSummary, Trade
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
@@ -52,7 +52,7 @@ async def get_market_names(ctx: Context) -> dict[str, Any]:
             "count": len(markets),
         }
     except Exception as e:
-        logger.error(f"Error fetching markets: {e!s}")
+        ctx.error(f"Error fetching markets: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
@@ -63,54 +63,50 @@ async def get_market_names(ctx: Context) -> dict[str, Any]:
         }
 
 
+market_details_adapter = TypeAdapter(list[MarketDetails])
+
+
 @server.tool("paradex-market-details")
 async def get_market_details(
-    market_ids: list[str] = Field(description="Market symbols to get details for."),
+    market_ids: list[str] = Field(
+        description="Market symbols to get details for.", default=["ALL"]
+    ),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[MarketDetails]:
     """
     Get detailed information about a specific market.
 
     Retrieves comprehensive details about a specific market, including
     base and quote assets, tick size, minimum order size, and other
     trading parameters.
-
-
-    Returns:
-        Dict[str, Any]: Detailed market information with the following structure:
-            - success (bool): Whether the request was successful
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment (mainnet/testnet)
-            - details (Dict): Detailed market information including trading parameters
-            - error (str, optional): Error message if request failed
     """
     try:
         client = await get_paradex_client()
 
         response = client.fetch_markets()
-        alldetails: list[dict[str, Any]] = response["results"]
-        if market_ids:
-            details = [detail for detail in alldetails if detail["symbol"] in market_ids]
+        if "error" in response:
+            raise Exception(response["error"])
+        details = market_details_adapter.validate_python(response["results"])
+        if market_ids and "ALL" not in market_ids:
+            details = [detail for detail in details if detail.symbol in market_ids]
         else:
-            details = alldetails
-        # Format the response
+            details = details
         return details
     except Exception as e:
-        logger.error(f"Error fetching market details: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "details": None,
-        }
+        ctx.error(f"Error fetching market details: {e!s}")
+        raise e
+
+
+market_summary_adapter = TypeAdapter(list[MarketSummary])
 
 
 @server.tool("paradex-market-summaries")
 async def get_market_summaries(
-    market_ids: list[str] = Field(description="Market symbols to get summaries for."),
+    market_ids: list[str] = Field(
+        description="Market symbols to get summaries for.", default=["ALL"]
+    ),
     ctx: Context = None,
-) -> dict[str, Any]:
+) -> list[MarketSummary]:
     """
     Get a summary of market statistics and current state for a list of markets.
     Empty list will return all market summaries.
@@ -118,40 +114,22 @@ async def get_market_summaries(
     Retrieves current market summary information including price, volume,
     24h change, and other key market metrics.
 
-    Returns:
-        Dict[str, Any]: Market summary information including:
-            - Current price
-            - 24h high/low
-            - 24h volume
-            - Price change percentage
-            - Other market statistics
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - summary (None): Null value for summary
     """
     try:
         # Get market summary from Paradex
         client = await get_paradex_client()
         response = client.fetch_markets_summary(params={"market": "ALL"})
-        all_summaries: list[dict[str, Any]] = response["results"]
-        if market_ids:
-            summaries = [summary for summary in all_summaries if summary["symbol"] in market_ids]
+        if "error" in response:
+            raise Exception(response["error"])
+        summaries = market_summary_adapter.validate_python(response["results"])
+        if market_ids and "ALL" not in market_ids:
+            summaries = [summary for summary in summaries if summary.symbol in market_ids]
         else:
-            summaries = all_summaries
+            summaries = summaries
         return summaries
     except Exception as e:
-        logger.error(f"Error fetching market summaries: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "summary": None,
-        }
+        ctx.error(f"Error fetching market summaries: {e!s}")
+        raise e
 
 
 @server.tool("paradex-funding-data")
@@ -238,7 +216,7 @@ async def get_orderbook(
         response = client.fetch_orderbook(market_id, params={"depth": depth})
         return response
     except Exception as e:
-        logger.error(f"Error fetching orderbook for {market_id}: {e!s}")
+        ctx.error(f"Error fetching orderbook for {market_id}: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
@@ -325,7 +303,7 @@ async def get_klines(
         ]
         return list_of_ohlcv
     except Exception as e:
-        logger.error(f"Error fetching klines for {market_id}: {e!s}")
+        ctx.error(f"Error fetching klines for {market_id}: {e!s}")
         raise e
 
 
@@ -354,7 +332,7 @@ async def get_trades(
         trades = trade_adapter.validate_python(response["results"])
         return trades
     except Exception as e:
-        logger.error(f"Error fetching trades for {market_id}: {e!s}")
+        ctx.error(f"Error fetching trades for {market_id}: {e!s}")
         raise e
 
 
@@ -377,5 +355,5 @@ async def get_bbo(
         bbo = BBO(**response)
         return bbo
     except Exception as e:
-        logger.error(f"Error fetching BBO for {market_id}: {e!s}")
+        ctx.error(f"Error fetching BBO for {market_id}: {e!s}")
         raise e

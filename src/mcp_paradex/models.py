@@ -6,7 +6,7 @@ This module contains all Pydantic models used across the application.
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # System models
@@ -216,3 +216,64 @@ class VaultAccountSummary(BaseModel):
     total_roi: str
     total_pnl: str
     created_at: int
+
+
+class Greeks(BaseModel):
+    """Model representing the Greeks of a market."""
+
+    delta: float
+    gamma: float
+    vega: float
+
+
+class MarketSummary(BaseModel):
+    """Model representing a summary of a market."""
+
+    symbol: str
+    mark_price: str
+    delta: str = Field(default="")
+    greeks: Greeks
+    last_traded_price: str
+    bid: str
+    ask: str
+    volume_24h: str
+    total_volume: str
+    created_at: int
+    underlying_price: str
+    open_interest: str
+    funding_rate: str
+    price_change_rate_24h: str
+
+
+class MarketDetails(BaseModel):
+    """Model representing the details of a market."""
+
+    symbol: str
+    base_currency: str
+    quote_currency: str
+    settlement_currency: str
+    order_size_increment: str
+    price_tick_size: float
+    min_notional: float
+    open_at: int
+    expiry_at: int
+    asset_kind: str
+    market_kind: str
+    position_limit: float
+    price_bands_width: float
+    max_open_orders: int
+    max_funding_rate: float
+    delta1_cross_margin_params: dict[str, float] = Field(default_factory=dict)
+    option_cross_margin_params: dict[str, dict[str, float]] = Field(default_factory=dict)
+    price_feed_id: str
+    oracle_ewma_factor: float
+    max_order_size: float
+    max_funding_rate_change: float
+    max_tob_spread: float
+    interest_rate: float
+    clamp_rate: float
+    funding_period_hours: int
+    tags: list[str]
+    option_type: str = Field(default="")
+    strike_price: float = Field(default=0.0)
+    iv_bands_width: float = Field(default=0.0)

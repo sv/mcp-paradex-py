@@ -152,6 +152,19 @@ To manually run all pre-commit hooks on all files:
 pre-commit run --all-files
 ```
 
+Generate models.py
+
+Convert paradex swagger to openapi using https://converter.swagger.io/#/Converter/convertByUrl
+
+```
+https://api.prod.paradex.trade/swagger/doc.json
+```
+
+```bash
+pip install datamodel-code-generator
+datamodel-codegen  --input prompts/paradex-openapi.json --use-annotated --use-default-kwarg --keep-model-order --output src/mcp_paradex/models/
+```
+
 ## How to Contribute
 
 1. Fork the repository

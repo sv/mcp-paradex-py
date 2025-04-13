@@ -3,12 +3,11 @@ Account management tools.
 """
 
 from mcp.server.fastmcp.server import Context
-from paradex_py.api.models import AccountSummary
 from pydantic import Field, TypeAdapter
 
-from mcp_paradex.models import Fill, Position, Transaction
+from mcp_paradex.models import AccountSummary, Fill, Position, Transaction
 from mcp_paradex.server.server import server
-from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
+from mcp_paradex.utils.paradex_client import api_call, get_authenticated_paradex_client
 
 
 @server.tool(name="paradex_account_summary")
@@ -18,8 +17,8 @@ async def get_account_summary(ctx: Context) -> AccountSummary:
 
     """
     client = await get_authenticated_paradex_client()
-    response = client.fetch_account_summary()
-    return response
+    response = await api_call(client, "account")
+    return AccountSummary.model_validate(response)
 
 
 position_adapter = TypeAdapter(list[Position])

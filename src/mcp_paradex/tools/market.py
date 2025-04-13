@@ -63,13 +63,6 @@ async def get_market_details(
     base and quote assets, tick size, minimum order size, and other
     trading parameters. If "ALL" is specified or no market IDs are provided,
     returns details for all available markets.
-
-    Args:
-        market_ids: List of market symbols to get details for. Use ["ALL"] for all markets.
-        ctx: Optional context object for logging.
-
-    Returns:
-        List of MarketDetails objects containing comprehensive information about each market.
     """
     try:
         client = await get_paradex_client()
@@ -104,14 +97,6 @@ async def get_market_summaries(
     Retrieves current market summary information including price, volume,
     24h change, and other key market metrics. If "ALL" is specified or no market IDs
     are provided, returns summaries for all available markets.
-
-    Args:
-        market_ids: List of market symbols to get summaries for. Use ["ALL"] for all markets.
-        ctx: Optional context object for logging.
-
-    Returns:
-        List of MarketSummary objects containing current statistics for each market.
-
     """
     try:
         # Get market summary from Paradex
@@ -253,20 +238,6 @@ async def get_klines(
     Retrieves historical price candlestick data for a specified market and time period.
     Each candlestick contains open, high, low, close prices and volume information.
 
-    Returns:
-        List[OHLCV]: Candlestick data with the following structure for each candle:
-            - timestamp
-            - open price
-            - high price
-            - low price
-            - close price
-            - volume
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
     """
     try:
         # Get klines from Paradex

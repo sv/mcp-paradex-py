@@ -46,46 +46,65 @@ class Trade(BaseModel):
 class Position(BaseModel):
     """Position model representing a trading position on Paradex."""
 
-    id: str
-    account: str
-    market: str
-    status: str
-    side: str
-    size: float
-    average_entry_price: float
-    average_entry_price_usd: float
-    average_exit_price: float
-    unrealized_pnl: float
-    unrealized_funding_pnl: float
-    cost: float
-    cost_usd: float
-    cached_funding_index: float
-    last_updated_at: int
-    last_fill_id: str
-    seq_no: int
-    liquidation_price: str = ""
-    leverage: float = 0
-    realized_positional_pnl: float = 0
+    id: str = Field(description="Unique string ID for the position")
+    account: str = Field(description="Account ID of the position")
+    market: str = Field(description="Market for position")
+    status: str = Field(description="Status of Position : Open or Closed", enum=["OPEN", "CLOSED"])
+    side: str = Field(description="Position Side : Long or Short", enum=["SHORT", "LONG"])
+    size: float = Field(
+        description="Size of the position with sign (positive if long or negative if short)"
+    )
+    average_entry_price: float = Field(description="Average entry price")
+    average_entry_price_usd: float = Field(description="Average entry price in USD")
+    average_exit_price: float = Field(description="Average exit price")
+    unrealized_pnl: float = Field(description="Unrealized P&L of the position in the quote asset")
+    unrealized_funding_pnl: float = Field(
+        description="Unrealized running funding P&L for the position"
+    )
+    cost: float = Field(description="Position cost")
+    cost_usd: float = Field(description="Position cost in USD")
+    cached_funding_index: float = Field(description="Position cached funding index")
+    last_updated_at: int = Field(description="Position last update time")
+    last_fill_id: str = Field(description="Last fill ID to which the position is referring")
+    seq_no: int = Field(
+        description="Unique increasing number (non-sequential) that is assigned to this position update. Can be used to deduplicate multiple feeds"
+    )
+    liquidation_price: str = Field(default="", description="Liquidation price of the position")
+    leverage: float = Field(default=0, description="Leverage of the position")
+    realized_positional_pnl: float = Field(
+        default=0,
+        description="Realized PnL including both positional PnL and funding payments. Reset to 0 when position is closed or flipped.",
+    )
+    created_at: int = Field(default=0, description="Position creation time")
+    closed_at: int = Field(default=0, description="Position closed time")
+    realized_positional_funding_pnl: str = Field(
+        default="",
+        description="Realized Funding PnL for the position. Reset to 0 when position is closed or flipped.",
+    )
 
 
 class Fill(BaseModel):
     """Fill model representing a trade fill on Paradex."""
 
-    id: str
-    side: str
-    liquidity: str
-    market: str
-    order_id: str
-    price: float
-    size: float
-    fee: float
-    fee_currency: str
-    created_at: int
-    remaining_size: float
-    client_id: str
-    fill_type: str
-    realized_pnl: float
-    realized_funding: float
+    id: str = Field(description="Unique string ID of fill per FillType")
+    side: str = Field(description="Taker side")
+    liquidity: str = Field(description="Maker or Taker")
+    market: str = Field(description="Market name")
+    order_id: str = Field(description="Order ID")
+    price: float = Field(description="Price at which order was filled")
+    size: float = Field(description="Size of the fill")
+    fee: float = Field(description="Fee paid by the user")
+    fee_currency: str = Field(description="Asset that fee is charged in")
+    created_at: int = Field(description="Fill time")
+    remaining_size: float = Field(description="Remaining size of the order")
+    client_id: str = Field(description="Unique client assigned ID for the order")
+    fill_type: str = Field(description="Fill type, can be FILL, LIQUIDATION or TRANSFER")
+    realized_pnl: float = Field(description="Realized PnL of the fill")
+    realized_funding: float = Field(description="Realized funding of the fill")
+    account: str = Field(default="", description="Account that made the fill")
+    underlying_price: str = Field(
+        default="", description="Underlying asset price of the fill (spot price)"
+    )
 
 
 class Transaction(BaseModel):
@@ -278,3 +297,27 @@ class MarketDetails(BaseModel):
     option_type: str = Field(default="")
     strike_price: float = Field(default=0.0)
     iv_bands_width: float = Field(default=0.0)
+
+
+class AccountSummary(BaseModel):
+    """Model representing an account summary response from Paradex."""
+
+    account: str = Field(description="User's starknet account")
+    account_value: str = Field(description="Current account value [with unrealized P&Ls]")
+    free_collateral: str = Field(
+        description="Free collateral available (Account value in excess of Initial Margin required)"
+    )
+    initial_margin_requirement: str = Field(
+        description="Amount required to open trade for the existing positions"
+    )
+    maintenance_margin_requirement: str = Field(
+        description="Amount required to maintain exisiting positions"
+    )
+    margin_cushion: str = Field(description="Acc value in excess of maintenance margin required")
+    seq_no: int = Field(
+        description="Unique increasing number (non-sequential) that is assigned to this account update. Can be used to deduplicate multiple feeds"
+    )
+    settlement_asset: str = Field(description="Settlement asset for the account")
+    status: str = Field(description="Status of the acc - like ACTIVE, LIQUIDATION")
+    total_collateral: str = Field(description="User's total collateral")
+    updated_at: int = Field(description="Account last updated time")

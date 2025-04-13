@@ -22,8 +22,8 @@ from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 logger = logging.getLogger(__name__)
 
 
-@server.tool("paradex-market-names")
-async def get_market_names(ctx: Context) -> dict[str, Any]:
+@server.tool(name="paradex_market_names")
+async def get_market_names(ctx: Context) -> list[str]:
     """
     Get a list of available markets from Paradex.
 
@@ -32,41 +32,24 @@ async def get_market_names(ctx: Context) -> dict[str, Any]:
     all markets that can be traded on Paradex.
 
     Returns:
-        Dict[str, Any]: List of available markets with the following structure:
-            - success (bool): Whether the request was successful
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment (mainnet/testnet)
-            - markets (List[str]): List of market symbols
-            - count (int): Total number of markets
+        List[str]: List of available markets.
     """
     try:
         client = await get_paradex_client()
         response = client.fetch_markets()
+        if "error" in response:
+            raise Exception(response["error"])
         markets = [market["symbol"] for market in response["results"]]
-        # Format the response
-        return {
-            "success": True,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "markets": markets,
-            "count": len(markets),
-        }
+        return markets
     except Exception as e:
         ctx.error(f"Error fetching markets: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "markets": [],
-            "count": 0,
-        }
+        return e
 
 
 market_details_adapter = TypeAdapter(list[MarketDetails])
 
 
-@server.tool("paradex-market-details")
+@server.tool(name="paradex_market_details")
 async def get_market_details(
     market_ids: list[str] = Field(
         description="Market symbols to get details for.", default=["ALL"]
@@ -74,11 +57,19 @@ async def get_market_details(
     ctx: Context = None,
 ) -> list[MarketDetails]:
     """
-    Get detailed information about a specific market.
+    Get detailed information about specific markets.
 
-    Retrieves comprehensive details about a specific market, including
+    Retrieves comprehensive details about specified markets, including
     base and quote assets, tick size, minimum order size, and other
-    trading parameters.
+    trading parameters. If "ALL" is specified or no market IDs are provided,
+    returns details for all available markets.
+
+    Args:
+        market_ids: List of market symbols to get details for. Use ["ALL"] for all markets.
+        ctx: Optional context object for logging.
+
+    Returns:
+        List of MarketDetails objects containing comprehensive information about each market.
     """
     try:
         client = await get_paradex_client()
@@ -100,7 +91,7 @@ async def get_market_details(
 market_summary_adapter = TypeAdapter(list[MarketSummary])
 
 
-@server.tool("paradex-market-summaries")
+@server.tool(name="paradex_market_summaries")
 async def get_market_summaries(
     market_ids: list[str] = Field(
         description="Market symbols to get summaries for.", default=["ALL"]
@@ -108,11 +99,18 @@ async def get_market_summaries(
     ctx: Context = None,
 ) -> list[MarketSummary]:
     """
-    Get a summary of market statistics and current state for a list of markets.
-    Empty list will return all market summaries.
+    Get a summary of market statistics and current state for specific markets.
 
     Retrieves current market summary information including price, volume,
-    24h change, and other key market metrics.
+    24h change, and other key market metrics. If "ALL" is specified or no market IDs
+    are provided, returns summaries for all available markets.
+
+    Args:
+        market_ids: List of market symbols to get summaries for. Use ["ALL"] for all markets.
+        ctx: Optional context object for logging.
+
+    Returns:
+        List of MarketSummary objects containing current statistics for each market.
 
     """
     try:
@@ -132,7 +130,7 @@ async def get_market_summaries(
         raise e
 
 
-@server.tool("paradex-funding-data")
+@server.tool(name="paradex_funding_data")
 async def get_funding_data(
     market_id: str = Field(description="Market symbol to get funding data for."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -160,16 +158,12 @@ async def get_funding_data(
         response = client.fetch_funding_data(
             params={"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
         )
+        if "error" in response:
+            raise Exception(response["error"])
         return response["results"]
     except Exception as e:
         logger.error(f"Error fetching funding data for {market_id}: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "funding_data": None,
-        }
+        return e
 
 
 class OrderbookDepth(int, Enum):
@@ -182,7 +176,7 @@ class OrderbookDepth(int, Enum):
     FULL = 100
 
 
-@server.tool("paradex-orderbook")
+@server.tool(name="paradex_orderbook")
 async def get_orderbook(
     market_id: str = Field(description="Market symbol to get orderbook for."),
     depth: int = Field(
@@ -243,7 +237,7 @@ class OHLCV(BaseModel):
 ohlcv_adapter = TypeAdapter(list[OHLCV])
 
 
-@server.tool("paradex-klines")
+@server.tool(name="paradex_klines")
 async def get_klines(
     market_id: str = Field(description="Market symbol to get klines for."),
     resolution: KLinesResolutionEnum = Field(
@@ -310,7 +304,7 @@ async def get_klines(
 trade_adapter = TypeAdapter(list[Trade])
 
 
-@server.tool("paradex-trades")
+@server.tool(name="paradex_trades")
 async def get_trades(
     market_id: str = Field(description="Market symbol to get trades for."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -336,7 +330,7 @@ async def get_trades(
         raise e
 
 
-@server.tool("paradex-bbo")
+@server.tool(name="paradex_bbo")
 async def get_bbo(
     market_id: str = Field(description="Market symbol to get BBO for."),
     ctx: Context = None,

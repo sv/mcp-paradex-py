@@ -16,21 +16,24 @@ from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 order_state_adapter = TypeAdapter(list[OrderState])
 
 
-@server.tool("paradex-account-open-orders")
-async def get_account_open_orders(
+@server.tool(name="paradex_open_orders")
+async def get_open_orders(
     market_id: str = Field(default="ALL", description="Filter by market."),
     ctx: Context = None,
 ) -> list[OrderState]:
     """
-    Get account open orders.
+    Get open orders.
     """
     client = await get_authenticated_paradex_client()
     response = client.fetch_orders(params={"market": market_id})
+    if "error" in response:
+        ctx.logger.error(f"Error fetching open orders: {response['error']}")
+        raise Exception(response["error"])
     orders = order_state_adapter.validate_python(response["results"])
     return orders
 
 
-@server.tool("paradex-create-order")
+@server.tool(name="paradex_create_order")
 async def create_order(
     market_id: str = Field(description="Market identifier."),
     order_side: OrderSideEnum = Field(description="Order side."),
@@ -47,6 +50,8 @@ async def create_order(
 ) -> OrderState:
     """
     Create a new order.
+    Response indicates that the order was accepted for processing. Check order status using order id.
+    Order parameters must follow requirements for the market.
     """
     client = await get_authenticated_paradex_client()
     o = Order(
@@ -65,78 +70,55 @@ async def create_order(
     return order
 
 
-@server.tool("paradex-cancel-order")
-async def cancel_order(
-    order_id: str = Field(description="Order identifier."),
+@server.tool(name="paradex_cancel_orders")
+async def cancel_orders(
+    order_id: str = Field(default="", description="Order identifier."),
+    client_id: str = Field(default="", description="Client-specified order ID."),
+    market_id: str = Field(default="ALL", description="Market identifier."),
     ctx: Context = None,
 ) -> OrderState:
     """
-    Cancel an order.
+    Cancel an order by order id (received from create_order) or client id (provided by you on create_order).
+    If only market_id is provided, cancels all orders for the market. market_id defaults to ALL.
+    Calling without any parameters will cancel all orders.
+
+    Succesful response indicates that orders were queued for cancellation.
+    Check order status using order id.
     """
     client = await get_authenticated_paradex_client()
-    response = client.cancel_order(order_id)
+    if order_id:
+        response = client.cancel_order(order_id)
+    elif client_id:
+        response = client.cancel_order_by_client_id(client_id)
+    elif market_id:
+        response = client.cancel_orders(market_id)
+    else:
+        raise Exception("Either order_id or client_id must be provided.")
     order = OrderState(**response)
     return order
 
 
-@server.tool("paradex-cancel-order-by-client-id")
-async def cancel_order_by_client_id(
+@server.tool(name="paradex_order_status")
+async def get_order_status(
+    order_id: str = Field(description="Order identifier."),
     client_id: str = Field(description="Client-specified order ID."),
     ctx: Context = None,
 ) -> OrderState:
     """
-    Cancel an order using the client-specified order ID.
-
-    This is useful when you've assigned your own custom IDs to orders and want to cancel
-    them using those IDs rather than the exchange-assigned order IDs.
-
+    Get order status by order id (received from create_order) or client id (provided by you on create_order).
     """
     client = await get_authenticated_paradex_client()
-    response = client.cancel_order_by_client_id(client_id)
-    order = OrderState(**response)
-    return order
-
-
-@server.tool("paradex-cancel-all-orders")
-async def cancel_all_orders(
-    market_id: str = Field(default="ALL", description="Market identifier to cancel orders for."),
-    ctx: Context = None,
-) -> Any:
-    """
-    Cancel all orders.
-    """
-    client = await get_authenticated_paradex_client()
-    client.cancel_all_orders(market_id)
-
-
-@server.tool("paradex-get-order-status")
-async def get_order_status(
-    order_id: str = Field(description="Order identifier."),
-    ctx: Context = None,
-) -> OrderState:
-    """
-    Get order status.
-    """
-    client = await get_authenticated_paradex_client()
-    response = client.fetch_order(order_id)
+    if order_id:
+        response = client.fetch_order(order_id)
+    elif client_id:
+        response = client.fetch_order_by_client_id(client_id)
+    else:
+        raise Exception("Either order_id or client_id must be provided.")
     order: OrderState = OrderState.model_validate(response)
     return order
 
 
-@server.tool("paradex-get-order-by-client-id")
-async def get_order_by_client_id(
-    client_id: str = Field(description="Client-specified order ID."),
-    ctx: Context = None,
-) -> OrderState:
-    """
-    Get order status using client order ID.
-    """
-    client = await get_authenticated_paradex_client()
-    response = client.fetch_order_by_client_id(client_id)
-    return OrderState(**response)
-
-
-@server.tool("paradex-get-orders-history")
+@server.tool(name="paradex_orders_history")
 async def get_orders_history(
     market_id: str = Field(description="Filter by market."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -154,6 +136,9 @@ async def get_orders_history(
     # Remove None values from params
     params = {k: v for k, v in params.items() if v is not None}
     response = client.fetch_orders_history(params=params)
+    if "error" in response:
+        ctx.logger.error(f"Error fetching orders history: {response['error']}")
+        raise Exception(response["error"])
     orders_raw: list[dict[str, Any]] = response["results"]
     orders: list[OrderState] = [OrderState(**order) for order in orders_raw]
     return orders

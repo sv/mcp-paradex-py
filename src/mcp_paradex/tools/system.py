@@ -19,7 +19,7 @@ from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 logger = logging.getLogger(__name__)
 
 
-@server.tool("paradex-system-config")
+@server.tool(name="paradex_system_config")
 async def get_system_config(ctx: Context) -> SystemConfig:
     """
     Get global Paradex system configuration.
@@ -42,21 +42,7 @@ async def get_system_config(ctx: Context) -> SystemConfig:
         raise e
 
 
-@server.tool("paradex-system-time")
-async def get_system_time(ctx: Context) -> int:
-    """
-    Get the current Paradex server time in milliseconds since epoch.
-    """
-    try:
-        client = await get_paradex_client()
-        time = client.fetch_system_time()
-        return time["server_time"]
-    except Exception as e:
-        logger.error(f"Error fetching system time: {e!s}")
-        raise e
-
-
-@server.tool("paradex-system-state")
+@server.tool(name="paradex_system_state")
 async def get_system_state(ctx: Context) -> SystemState:
     """
     Get the current Paradex system operational state.
@@ -69,7 +55,8 @@ async def get_system_state(ctx: Context) -> SystemState:
     try:
         client = await get_paradex_client()
         state = client.fetch_system_state()
-        return SystemState(status=state["status"])
+        time = client.fetch_system_time()
+        return SystemState(status=state["status"], timestamp=time["server_time"])
     except Exception as e:
         logger.error(f"Error fetching system state: {e!s}")
         raise e

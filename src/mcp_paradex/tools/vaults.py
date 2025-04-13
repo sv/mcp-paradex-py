@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 vault_strategy_adapter = TypeAdapter(list[VaultStrategy])
 
 
-@server.tool("paradex-vault-list")
+@server.tool(name="paradex_vault_list")
 async def get_vault_list() -> list[VaultStrategy]:
     """
     Get a list of available vaults from Paradex.
@@ -56,7 +56,7 @@ async def get_vault_list() -> list[VaultStrategy]:
 vault_adapter = TypeAdapter(list[Vault])
 
 
-@server.tool("paradex-vault-details")
+@server.tool(name="paradex_vault_details")
 async def get_vault_details(
     vault_address: str = Field(description="The address of the vault to get details for."),
 ) -> list[Vault]:
@@ -91,7 +91,7 @@ class VaultConfig(BaseModel):
     min_owner_share_percentage: str
 
 
-@server.tool("paradex-vaults-config")
+@server.tool(name="paradex_vaults_config")
 async def get_vaults_config() -> VaultConfig:
     """
     Get global configuration for vaults from Paradex.
@@ -114,7 +114,7 @@ async def get_vaults_config() -> VaultConfig:
 vault_balance_adapter = TypeAdapter(list[VaultBalance])
 
 
-@server.tool("paradex-vault-balance")
+@server.tool(name="paradex_vault_balance")
 async def get_vault_balance(
     vault_address: str = Field(description="The address of the vault to get balance for."),
 ) -> list[VaultBalance]:
@@ -143,7 +143,7 @@ async def get_vault_balance(
 vault_summary_adapter = TypeAdapter(list[VaultSummary])
 
 
-@server.tool("paradex-vault-summary")
+@server.tool(name="paradex_vault_summary")
 async def get_vault_summary(
     vault_address: str = Field(description="The address of the vault to get summary for."),
 ) -> VaultSummary:
@@ -167,7 +167,7 @@ async def get_vault_summary(
         raise e
 
 
-@server.tool("paradex-vault-transfers")
+@server.tool(name="paradex_vault_transfers")
 async def get_vault_transfers(
     vault_address: str = Field(description="The address of the vault to get transfers for."),
 ) -> Dict[str, Any]:
@@ -214,7 +214,7 @@ async def get_vault_transfers(
 position_adapter = TypeAdapter(list[Position])
 
 
-@server.tool("paradex-vault-positions")
+@server.tool(name="paradex_vault_positions")
 async def get_vault_positions(
     vault_address: str = Field(description="The address of the vault to get positions for."),
 ) -> list[Position]:
@@ -238,7 +238,7 @@ async def get_vault_positions(
 vault_account_summary_adapter = TypeAdapter(list[VaultAccountSummary])
 
 
-@server.tool("paradex-vault-account-summary")
+@server.tool(name="paradex_vault_account_summary")
 async def get_vault_account_summary(
     vault_address: str = Field(description="The address of the vault to get account summary for."),
 ) -> list[VaultAccountSummary]:

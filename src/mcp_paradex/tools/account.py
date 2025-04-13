@@ -11,7 +11,7 @@ from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 
 
-@server.tool("paradex-account-summary")
+@server.tool(name="paradex_account_summary")
 async def get_account_summary(ctx: Context) -> AccountSummary:
     """
     Get account summary.
@@ -25,13 +25,16 @@ async def get_account_summary(ctx: Context) -> AccountSummary:
 position_adapter = TypeAdapter(list[Position])
 
 
-@server.tool("paradex-account-positions")
+@server.tool(name="paradex_account_positions")
 async def get_account_positions(ctx: Context) -> list[Position]:
     """
     Get account positions.
     """
     client = await get_authenticated_paradex_client()
     response = client.fetch_positions()
+    if "error" in response:
+        ctx.error(response["error"])
+        raise Exception(response["error"])
     positions = position_adapter.validate_python(response["results"])
     return positions
 
@@ -39,7 +42,7 @@ async def get_account_positions(ctx: Context) -> list[Position]:
 fill_adapter = TypeAdapter(list[Fill])
 
 
-@server.tool("paradex-account-fills")
+@server.tool(name="paradex_account_fills")
 async def get_account_fills(
     market_id: str = Field(description="Filter by market ID."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -52,11 +55,14 @@ async def get_account_fills(
     client = await get_authenticated_paradex_client()
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
     response = client.fetch_fills(params)
+    if "error" in response:
+        ctx.error(response["error"])
+        raise Exception(response["error"])
     fills = [Fill(**fill) for fill in response["results"]]
     return fills
 
 
-@server.tool("paradex-account-funding-payments")
+@server.tool(name="paradex_account_funding_payments")
 async def get_account_funding_payments(
     market_id: str | None = Field(default=None, description="Filter by market ID."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -80,7 +86,7 @@ async def get_account_funding_payments(
 transaction_adapter = TypeAdapter(list[Transaction])
 
 
-@server.tool("paradex-account-transactions")
+@server.tool(name="paradex_account_transactions")
 async def get_account_transactions(
     transaction_type: str | None = Field(default=None, description="Filter by transaction type."),
     start_unix_ms: int = Field(description="Start time in unix milliseconds."),
@@ -113,5 +119,8 @@ async def get_account_transactions(
     # Remove None values from params
     params = {k: v for k, v in params.items() if v is not None}
     response = client.fetch_transactions(params)
+    if "error" in response:
+        ctx.error(response["error"])
+        raise Exception(response["error"])
     transactions = transaction_adapter.validate_python(response["results"])
     return transactions

@@ -14,6 +14,7 @@ class SystemState(BaseModel):
     """Model representing the current state of the Paradex system."""
 
     status: str
+    timestamp: int = Field(default=0)
 
 
 # Market models

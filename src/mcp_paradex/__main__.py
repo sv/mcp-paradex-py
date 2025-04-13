@@ -13,6 +13,7 @@ if parent_dir not in sys.path:
 # Import and run the main function
 from mcp_paradex.resources import *
 from mcp_paradex.server.server import run_cli
+from mcp_paradex.tools import *
 
 if __name__ == "__main__":
     run_cli()

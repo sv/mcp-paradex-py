@@ -22,10 +22,11 @@ async def get_open_orders(
     ctx: Context = None,
 ) -> list[OrderState]:
     """
-    Get open orders.
+    Get open orders for a market or all markets if market_id is not provided.
     """
     client = await get_authenticated_paradex_client()
-    response = client.fetch_orders(params={"market": market_id})
+    params = {"market": market_id} if market_id != "" and market_id != "ALL" else None
+    response = client.fetch_orders(params=params)
     if "error" in response:
         ctx.logger.error(f"Error fetching open orders: {response['error']}")
         raise Exception(response["error"])

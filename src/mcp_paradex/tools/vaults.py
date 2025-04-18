@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 import jmespath
+from jmespath.exceptions import ParseError
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex.models import (
@@ -24,6 +25,7 @@ from mcp_paradex.models import (
 )
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
+from mcp_paradex.utils.jmespath_utils import apply_jmespath_filter
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 
 logger = logging.getLogger(__name__)
@@ -72,14 +74,12 @@ async def get_vaults(
 
         # Apply JMESPath filter if provided
         if jmespath_filter:
-            vaults_data = [vault.model_dump() for vault in vaults]
-            filtered_data = jmespath.search(jmespath_filter, vaults_data)
-            if filtered_data:
-                vaults = vault_adapter.validate_python(
-                    filtered_data, strict=False, experimental_allow_partial=True
-                )
-            else:
-                vaults = []
+            vaults = apply_jmespath_filter(
+                data=vaults,
+                jmespath_filter=jmespath_filter,
+                type_adapter=vault_adapter,
+                error_logger=logger.error,
+            )
 
         return vaults
     except Exception as e:
@@ -189,14 +189,12 @@ async def get_vault_summary(
 
         # Apply JMESPath filter if provided
         if jmespath_filter:
-            summary_data = [s.model_dump() for s in summary]
-            filtered_data = jmespath.search(jmespath_filter, summary_data)
-            if filtered_data:
-                summary = vault_summary_adapter.validate_python(
-                    filtered_data, strict=False, experimental_allow_partial=True
-                )
-            else:
-                summary = []
+            summary = apply_jmespath_filter(
+                data=summary,
+                jmespath_filter=jmespath_filter,
+                type_adapter=vault_summary_adapter,
+                error_logger=logger.error,
+            )
 
         return summary
     except Exception as e:

@@ -12,12 +12,14 @@ from enum import Enum
 from typing import Any, Literal
 
 import jmespath
+from jmespath.exceptions import ParseError
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex.models import BBO, MarketDetails, MarketSummary, Trade
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
+from mcp_paradex.utils.jmespath_utils import apply_jmespath_filter
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 
 logger = logging.getLogger(__name__)
@@ -45,7 +47,8 @@ async def get_markets(
     trading parameters. If "ALL" is specified or no market IDs are provided,
     returns details for all available markets.
 
-    You can use JMESPath expressions to filter, sort, or limit the results.
+    You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
+
     Examples:
     - Filter by base asset: "[?base_asset=='BTC']"
     - Sort by 24h volume: "sort_by([*], &volume_24h)"
@@ -63,14 +66,12 @@ async def get_markets(
 
         # Apply JMESPath filter if provided
         if jmespath_filter:
-            # Convert to dict for JMESPath to work properly
-            details_dict = [detail.model_dump() for detail in details]
-            filtered_details = jmespath.search(jmespath_filter, details_dict)
-            # Convert back to MarketDetails objects
-            if filtered_details:
-                details = market_details_adapter.validate_python(filtered_details)
-            else:
-                details = []
+            details = apply_jmespath_filter(
+                data=details,
+                jmespath_filter=jmespath_filter,
+                type_adapter=market_details_adapter,
+                error_logger=ctx.error if ctx else None,
+            )
 
         return details
     except Exception as e:
@@ -99,7 +100,7 @@ async def get_market_summaries(
     24h change, and other key market metrics. If "ALL" is specified or no market IDs
     are provided, returns summaries for all available markets.
 
-    You can use JMESPath expressions to filter, sort, or limit the results.
+    You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
     Examples:
     - Filter by high price: "[?high_price > `10000`]"
     - Sort by volume: "sort_by([*], &volume)"
@@ -120,14 +121,12 @@ async def get_market_summaries(
 
         # Apply JMESPath filter if provided
         if jmespath_filter:
-            # Convert to dict for JMESPath to work properly
-            summaries_dict = [summary.model_dump() for summary in summaries]
-            filtered_summaries = jmespath.search(jmespath_filter, summaries_dict)
-            # Convert back to MarketSummary objects
-            if filtered_summaries:
-                summaries = market_summary_adapter.validate_python(filtered_summaries)
-            else:
-                summaries = []
+            summaries = apply_jmespath_filter(
+                data=summaries,
+                jmespath_filter=jmespath_filter,
+                type_adapter=market_summary_adapter,
+                error_logger=ctx.error if ctx else None,
+            )
 
         return summaries
     except Exception as e:

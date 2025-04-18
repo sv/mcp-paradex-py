@@ -39,8 +39,8 @@ vault_adapter = TypeAdapter(list[Vault])
 @server.tool(name="paradex_vaults")
 async def get_vaults(
     vault_address: str = Field(
-        default=None,
-        description="The address of the vault to get details for or None to get all vaults.",
+        default="",
+        description="The address of the vault to get details for or empty string to get all vaults.",
     ),
     jmespath_filter: str = Field(
         default=None, description="JMESPath expression to filter, sort, or limit the results."

@@ -9,8 +9,9 @@ positions, and transaction history.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+import jmespath
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex.models import (
@@ -30,50 +31,56 @@ logger = logging.getLogger(__name__)
 vault_strategy_adapter = TypeAdapter(list[VaultStrategy])
 
 
-@server.tool(name="paradex_vault_list")
-async def get_vault_list() -> list[VaultStrategy]:
-    """
-    Get a list of available vaults from Paradex.
-
-    Retrieves all available vaults on Paradex, including their addresses and names.
-    This tool requires no parameters and returns a comprehensive list of
-    all vaults that can be accessed on Paradex.
-
-    """
-    try:
-        client = await get_paradex_client()
-        response = await api_call(client, "vaults")
-        if "error" in response:
-            raise Exception(response["error"])
-        results = response["results"]
-        vault_list = vault_strategy_adapter.validate_python(results)
-        return vault_list
-    except Exception as e:
-        logger.error(f"Error fetching vaults: {e!s}")
-        raise e
-
-
 vault_adapter = TypeAdapter(list[Vault])
 
 
-@server.tool(name="paradex_vault_details")
-async def get_vault_details(
-    vault_address: str = Field(description="The address of the vault to get details for."),
+@server.tool(name="paradex_vaults")
+async def get_vaults(
+    vault_address: str = Field(
+        default=None,
+        description="The address of the vault to get details for or None to get all vaults.",
+    ),
+    jmespath_filter: str = Field(
+        default=None, description="JMESPath expression to filter, sort, or limit the results."
+    ),
 ) -> list[Vault]:
     """
-    Get detailed information about a specific vault.
+    Get detailed information about a specific vault or all vaults if no address is provided.
 
     Retrieves comprehensive details about a specific vault identified by its address,
     including configuration, permissions, and other vault-specific parameters.
 
+    Use jmespath_filter to reduce the number of results as much as possible as number of vaults can be large.
+
+    You can use JMESPath expressions to filter, sort, or limit the results.
+    Examples:
+    - Filter by owner: "[?owner_account=='0x123...']"
+    - Filter by status: "[?status=='ACTIVE']"
+    - Find vaults with specific strategy: "[?contains(strategies, 'strategy_id')]"
+    - Sort by creation date: "sort_by([*], &created_at)"
+    - Limit to newest vaults: "sort_by([*], &created_at)[-5:]"
+    - Select specific fields: "[*].{address: address, name: name, kind: kind, status: status}"
     """
     try:
         client = await get_paradex_client()
-        response = await api_call(client, "vaults", params={"address": vault_address})
+        params = {"address": vault_address} if vault_address else None
+        response = await api_call(client, "vaults", params=params)
         if "error" in response:
             raise Exception(response["error"])
         results = response["results"]
         vaults = vault_adapter.validate_python(results)
+
+        # Apply JMESPath filter if provided
+        if jmespath_filter:
+            vaults_data = [vault.model_dump() for vault in vaults]
+            filtered_data = jmespath.search(jmespath_filter, vaults_data)
+            if filtered_data:
+                vaults = vault_adapter.validate_python(
+                    filtered_data, strict=False, experimental_allow_partial=True
+                )
+            else:
+                vaults = []
+
         return vaults
     except Exception as e:
         logger.error(f"Error fetching vault details for {vault_address}: {e!s}")
@@ -103,7 +110,7 @@ async def get_vaults_config() -> VaultConfig:
     try:
         client = await get_paradex_client()
         response = await api_call(client, "vaults/config")
-        config = VaultConfig.validate_python(response)
+        config = VaultConfig.model_validate(response)
         return config
 
     except Exception as e:
@@ -145,22 +152,52 @@ vault_summary_adapter = TypeAdapter(list[VaultSummary])
 
 @server.tool(name="paradex_vault_summary")
 async def get_vault_summary(
-    vault_address: str = Field(description="The address of the vault to get summary for."),
-) -> VaultSummary:
+    vault_address: str = Field(
+        default=None,
+        description="The address of the vault to get summary for or None to get all vaults.",
+    ),
+    jmespath_filter: str = Field(
+        default=None, description="JMESPath expression to filter or transform the result."
+    ),
+) -> list[VaultSummary]:
     """
-    Get a comprehensive summary of a specific vault.
+    Get a comprehensive summary of a specific vault or all vaults if no address is provided.
 
     Retrieves a summary of all important information about a vault,
     including balance, positions, recent activity, and performance metrics.
     This provides a high-level overview of the vault's current state.
+
+    Use jmespath_filter to reduce the number of results as much as possible as number of vaults can be large.
+
+    You can use JMESPath expressions to filter, sort, or transform the results.
+    Examples:
+    - Filter by TVL: "[?to_number(tvl) > `10000`]"
+    - Filter by performance: "[?to_number(total_roi) > `5.0`]"
+    - Sort by TVL (descending): "reverse(sort_by([*], &to_number(tvl)))"
+    - Get top performers: "sort_by([*], &to_number(total_roi))[-3:]"
+    - Filter by recent returns: "[?to_number(roi_24h) > `0.5`]"
+    - Extract specific metrics: "[*].{address: address, tvl: tvl, total_roi: total_roi, volume_24h: volume_24h}"
     """
     try:
         client = await get_paradex_client()
-        response = await api_call(client, "vaults/summary", params={"address": vault_address})
+        params = {"address": vault_address} if vault_address else None
+        response = await api_call(client, "vaults/summary", params=params)
         if "error" in response:
             raise Exception(response["error"])
         results = response["results"]
         summary = vault_summary_adapter.validate_python(results)
+
+        # Apply JMESPath filter if provided
+        if jmespath_filter:
+            summary_data = [s.model_dump() for s in summary]
+            filtered_data = jmespath.search(jmespath_filter, summary_data)
+            if filtered_data:
+                summary = vault_summary_adapter.validate_python(
+                    filtered_data, strict=False, experimental_allow_partial=True
+                )
+            else:
+                summary = []
+
         return summary
     except Exception as e:
         logger.error(f"Error fetching summary for vault {vault_address}: {e!s}")

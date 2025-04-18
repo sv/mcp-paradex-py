@@ -11,6 +11,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
+import jmespath
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
@@ -22,37 +23,17 @@ from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 logger = logging.getLogger(__name__)
 
 
-@server.tool(name="paradex_market_names")
-async def get_market_names(ctx: Context) -> list[str]:
-    """
-    Get a list of available markets from Paradex.
-
-    Retrieves all available trading markets/pairs from the Paradex exchange.
-    This tool requires no parameters and returns a comprehensive list of
-    all markets that can be traded on Paradex.
-
-    Returns:
-        List[str]: List of available markets.
-    """
-    try:
-        client = await get_paradex_client()
-        response = client.fetch_markets()
-        if "error" in response:
-            raise Exception(response["error"])
-        markets = [market["symbol"] for market in response["results"]]
-        return markets
-    except Exception as e:
-        ctx.error(f"Error fetching markets: {e!s}")
-        return e
-
-
 market_details_adapter = TypeAdapter(list[MarketDetails])
 
 
-@server.tool(name="paradex_market_details")
-async def get_market_details(
+@server.tool(name="paradex_markets")
+async def get_markets(
     market_ids: list[str] = Field(
         description="Market symbols to get details for.", default=["ALL"]
+    ),
+    jmespath_filter: str = Field(
+        description="JMESPath expression to filter, sort, or limit the results.",
+        default=None,
     ),
     ctx: Context = None,
 ) -> list[MarketDetails]:
@@ -63,6 +44,12 @@ async def get_market_details(
     base and quote assets, tick size, minimum order size, and other
     trading parameters. If "ALL" is specified or no market IDs are provided,
     returns details for all available markets.
+
+    You can use JMESPath expressions to filter, sort, or limit the results.
+    Examples:
+    - Filter by base asset: "[?base_asset=='BTC']"
+    - Sort by 24h volume: "sort_by([*], &volume_24h)"
+    - Limit to top 5 by volume: "[sort_by([*], &to_number(volume_24h))[-5:]]"
     """
     try:
         client = await get_paradex_client()
@@ -73,8 +60,18 @@ async def get_market_details(
         details = market_details_adapter.validate_python(response["results"])
         if market_ids and "ALL" not in market_ids:
             details = [detail for detail in details if detail.symbol in market_ids]
-        else:
-            details = details
+
+        # Apply JMESPath filter if provided
+        if jmespath_filter:
+            # Convert to dict for JMESPath to work properly
+            details_dict = [detail.model_dump() for detail in details]
+            filtered_details = jmespath.search(jmespath_filter, details_dict)
+            # Convert back to MarketDetails objects
+            if filtered_details:
+                details = market_details_adapter.validate_python(filtered_details)
+            else:
+                details = []
+
         return details
     except Exception as e:
         ctx.error(f"Error fetching market details: {e!s}")
@@ -89,6 +86,10 @@ async def get_market_summaries(
     market_ids: list[str] = Field(
         description="Market symbols to get summaries for.", default=["ALL"]
     ),
+    jmespath_filter: str = Field(
+        description="JMESPath expression to filter, sort, or limit the results.",
+        default=None,
+    ),
     ctx: Context = None,
 ) -> list[MarketSummary]:
     """
@@ -97,6 +98,12 @@ async def get_market_summaries(
     Retrieves current market summary information including price, volume,
     24h change, and other key market metrics. If "ALL" is specified or no market IDs
     are provided, returns summaries for all available markets.
+
+    You can use JMESPath expressions to filter, sort, or limit the results.
+    Examples:
+    - Filter by high price: "[?high_price > `10000`]"
+    - Sort by volume: "sort_by([*], &volume)"
+    - Get top 3 by price change: "[sort_by([*], &to_number(price_change_percent))[-3:]]"
     """
     try:
         # Get market summary from Paradex
@@ -104,13 +111,27 @@ async def get_market_summaries(
         response = client.fetch_markets_summary(params={"market": "ALL"})
         if "error" in response:
             raise Exception(response["error"])
+
+        # Try to validate directly now that the model is more flexible
         summaries = market_summary_adapter.validate_python(response["results"])
+
         if market_ids and "ALL" not in market_ids:
             summaries = [summary for summary in summaries if summary.symbol in market_ids]
-        else:
-            summaries = summaries
+
+        # Apply JMESPath filter if provided
+        if jmespath_filter:
+            # Convert to dict for JMESPath to work properly
+            summaries_dict = [summary.model_dump() for summary in summaries]
+            filtered_summaries = jmespath.search(jmespath_filter, summaries_dict)
+            # Convert back to MarketSummary objects
+            if filtered_summaries:
+                summaries = market_summary_adapter.validate_python(filtered_summaries)
+            else:
+                summaries = []
+
         return summaries
     except Exception as e:
+        logger.error(f"Error fetching market summaries: {e!s}")
         ctx.error(f"Error fetching market summaries: {e!s}")
         raise e
 

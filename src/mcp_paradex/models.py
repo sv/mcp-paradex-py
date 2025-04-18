@@ -241,9 +241,12 @@ class VaultAccountSummary(BaseModel):
 class Greeks(BaseModel):
     """Model representing the Greeks of a market."""
 
-    delta: float
-    gamma: float
-    vega: float
+    delta: float = 0.0
+    gamma: float = 0.0
+    vega: float = 0.0
+
+    # Allow additional fields beyond the defined ones
+    model_config = {"extra": "allow"}
 
 
 class MarketSummary(BaseModel):
@@ -252,7 +255,7 @@ class MarketSummary(BaseModel):
     symbol: str
     mark_price: str
     delta: str = Field(default="")
-    greeks: Greeks
+    greeks: Greeks = None
     last_traded_price: str
     bid: str
     ask: str

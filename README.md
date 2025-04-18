@@ -173,50 +173,44 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### System Tools
 
-- `paradex-system-config` - Get global Paradex system configuration
-- `paradex-system-time` - Get current Paradex server time
-- `paradex-system-state` - Get current system state
+- `paradex_system_config` - Get global Paradex system configuration
+- `paradex_system_state` - Get current system state
 
 #### Market Tools
 
-- `paradex-market-names` - Get a list of available markets from Paradex
-- `paradex-market-details` - Get detailed information about a specific market
-- `paradex-market-summaries` - Get summaries for all markets or a specific market
-- `paradex-funding-data` - Get funding rate data for a market
-- `paradex-orderbook` - Get the current orderbook for a market
-- `paradex-klines` - Get historical candlestick data for a market
-- `paradex-trades` - Get recent trades for a market
-- `paradex-bbo` - Get best bid and offer for a market
+- `paradex_markets` - Get detailed information about markets, including base/quote assets, tick size, and other trading parameters
+- `paradex_market_summaries` - Get summaries with price, volume, 24h change, and other key market metrics
+- `paradex_funding_data` - Get historical funding rate data for perpetual markets
+- `paradex_orderbook` - Get the current orderbook for a market with customizable depth
+- `paradex_klines` - Get historical candlestick (OHLCV) data for a market
+- `paradex_trades` - Get recent trades for a market with price, size, and timestamp information
+- `paradex_bbo` - Get best bid and offer (tightest spread) for a market
 
 #### Account Tools
 
-- `paradex-account-summary` - Get account summary information
-- `paradex-account-positions` - Get current account positions
-- `paradex-account-fills` - Get account trade fills
-- `paradex-account-funding-payments` - Get account funding payments
-- `paradex-account-transactions` - Get account transaction history
+- `paradex_account_summary` - Get account summary information
+- `paradex_account_positions` - Get current account positions
+- `paradex_account_fills` - Get account trade fills
+- `paradex_account_funding_payments` - Get account funding payments
+- `paradex_account_transactions` - Get account transaction history
 
 #### Order Tools
 
-- `paradex-account-open-orders` - Get all open orders for an account
-- `paradex-create-order` - Create a new order on Paradex
-- `paradex-cancel-order` - Cancel an existing order
-- `paradex-cancel-order-by-client-id` - Cancel an order by client ID
-- `paradex-cancel-all-orders` - Cancel all open orders
-- `paradex-get-order-status` - Get the status of an order
-- `paradex-get-order-by-client-id` - Get order status by client ID
-- `paradex-get-orders-history` - Get historical orders for an account
+- `paradex_open_orders` - Get all open orders for an account
+- `paradex_create_order` - Create a new order on Paradex
+- `paradex_cancel_orders` - Cancel existing orders
+- `paradex_order_status` - Get the status of an order
+- `paradex_orders_history` - Get historical orders for an account
 
 #### Vault Tools
 
-- `paradex-vault-list` - List all available vaults
-- `paradex-vault-details` - Get detailed information about a vault
-- `paradex-vaults-config` - Get vault configuration options
-- `paradex-vault-balance` - Get the balance of a vault
-- `paradex-vault-summary` - Get a summary of a vault's status
-- `paradex-vault-transfers` - Get transfer history for a vault
-- `paradex-vault-positions` - Get current positions in a vault
-- `paradex-vault-account-summary` - Get account summary for a vault
+- `paradex_vaults` - Get detailed information about specific vaults or all vaults with filtering options
+- `paradex_vaults_config` - Get global configuration for vaults including fees, limits, and other settings
+- `paradex_vault_balance` - Get the current balance of a vault with available/locked funds information
+- `paradex_vault_summary` - Get comprehensive summary of vault performance, balance, and activity
+- `paradex_vault_transfers` - Get deposit and withdrawal history for a vault
+- `paradex_vault_positions` - Get current trading positions for a vault with market, size, entry price details
+- `paradex_vault_account_summary` - Get trading account information for a vault including margin and risk metrics
 
 ## Contributing
 

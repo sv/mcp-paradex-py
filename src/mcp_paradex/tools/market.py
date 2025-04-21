@@ -11,8 +11,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
-import jmespath
-from jmespath.exceptions import ParseError
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 

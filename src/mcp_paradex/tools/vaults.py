@@ -9,10 +9,8 @@ positions, and transaction history.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-import jmespath
-from jmespath.exceptions import ParseError
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex.models import (

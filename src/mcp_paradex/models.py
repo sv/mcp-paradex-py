@@ -220,32 +220,46 @@ class VaultStrategy(BaseModel):
 class Vault(BaseModel):
     """Vault model representing a trading vault on Paradex."""
 
-    address: Annotated[str, Field(description="Contract address of the vault")]
-    name: Annotated[str, Field(description="Name of the vault")]
-    description: Annotated[str, Field(description="Description of the vault")]
-    owner_account: Annotated[str, Field(description="Owner account of the vault")]
-    operator_account: Annotated[str, Field(description="Operator account of the vault")]
-    strategies: Annotated[list[str], Field(description="Strategies of the vault")]
-    token_address: Annotated[str, Field(description="LP token address")]
-    status: Annotated[str, Field(description="Status of the vault")]
+    address: Annotated[str, Field(default="", description="Contract address of the vault")]
+    name: Annotated[str, Field(default="", description="Name of the vault")]
+    description: Annotated[str, Field(default="", description="Description of the vault")]
+    owner_account: Annotated[str, Field(default="", description="Owner account of the vault")]
+    operator_account: Annotated[str, Field(default="", description="Operator account of the vault")]
+    strategies: Annotated[
+        list[str], Field(default_factory=list, description="Strategies of the vault")
+    ]
+    token_address: Annotated[str, Field(default="", description="LP token address")]
+    status: Annotated[str, Field(default="", description="Status of the vault")]
     kind: Annotated[
         str,
         Field(
-            description="Kind of the vault: 'user' for user-defined vaults, 'protocol' for vaults controlled by Paradex"
+            default="",
+            description="Kind of the vault: 'user' for user-defined vaults, 'protocol' for vaults controlled by Paradex",
         ),
     ]
     profit_share: Annotated[
-        int, Field(description="Profit share of the vault in percentage, i.e. 10 means 10%")
+        int,
+        Field(default=0, description="Profit share of the vault in percentage, i.e. 10 means 10%"),
     ]
-    lockup_period: Annotated[int, Field(description="Lockup period of the vault in days")]
+    lockup_period: Annotated[
+        int, Field(default=0, description="Lockup period of the vault in days")
+    ]
     max_tvl: Annotated[
-        int, Field(description="Maximum amount of assets the vault can hold in USDC")
+        int, Field(default=0, description="Maximum amount of assets the vault can hold in USDC")
     ]
     created_at: Annotated[
-        int, Field(description="Unix timestamp in milliseconds of when the vault has been created")
+        int,
+        Field(
+            default=0,
+            description="Unix timestamp in milliseconds of when the vault has been created",
+        ),
     ]
     last_updated_at: Annotated[
-        int, Field(description="Unix timestamp in milliseconds of when the vault was last updated")
+        int,
+        Field(
+            default=0,
+            description="Unix timestamp in milliseconds of when the vault was last updated",
+        ),
     ]
 
 
@@ -260,88 +274,113 @@ class VaultBalance(BaseModel):
 class VaultSummary(BaseModel):
     """Model representing a summary of a vault's performance and statistics."""
 
-    address: Annotated[str, Field(description="Contract address of the vault")]
+    address: Annotated[str, Field(default="", description="Contract address of the vault")]
     owner_equity: Annotated[
         str,
         Field(
-            description="Vault equity of the owner (% of ownership) in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Vault equity of the owner (% of ownership) in percentage, i.e. 0.1 means 10%",
         ),
     ]
-    vtoken_supply: Annotated[str, Field(description="Total amount of available vault tokens")]
-    vtoken_price: Annotated[str, Field(description="Current value of vault token price in USD")]
+    vtoken_supply: Annotated[
+        str, Field(default="", description="Total amount of available vault tokens")
+    ]
+    vtoken_price: Annotated[
+        str, Field(default="", description="Current value of vault token price in USD")
+    ]
     tvl: Annotated[
         str,
         Field(
-            description="Net deposits of the vault in USDC (deprecated; use net_deposits instead)"
+            default="",
+            description="Net deposits of the vault in USDC (deprecated; use net_deposits instead)",
         ),
     ]
-    net_deposits: Annotated[str, Field(description="Net deposits of the vault in USDC")]
+    net_deposits: Annotated[str, Field(default="", description="Net deposits of the vault in USDC")]
     total_roi: Annotated[
-        str, Field(description="Total ROI of the vault in percentage, i.e. 0.1 means 10%")
+        str,
+        Field(default="", description="Total ROI of the vault in percentage, i.e. 0.1 means 10%"),
     ]
     roi_24h: Annotated[
         str,
         Field(
-            description="Return of the vault in the last 24 hours in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Return of the vault in the last 24 hours in percentage, i.e. 0.1 means 10%",
         ),
     ]
     roi_7d: Annotated[
         str,
         Field(
-            description="Return of the vault in the last 7 days in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Return of the vault in the last 7 days in percentage, i.e. 0.1 means 10%",
         ),
     ]
     roi_30d: Annotated[
         str,
         Field(
-            description="Return of the vault in the last 30 days in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Return of the vault in the last 30 days in percentage, i.e. 0.1 means 10%",
         ),
     ]
     last_month_return: Annotated[
         str,
         Field(
-            description="APR return of the vault in the last trailing month in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="APR return of the vault in the last trailing month in percentage, i.e. 0.1 means 10%",
         ),
     ]
-    total_pnl: Annotated[str, Field(description="Total P&L of the vault in USD")]
-    pnl_24h: Annotated[str, Field(description="P&L of the vault in the last 24 hours in USD")]
-    pnl_7d: Annotated[str, Field(description="P&L of the vault in the last 7 days in USD")]
-    pnl_30d: Annotated[str, Field(description="P&L of the vault in the last 30 days in USD")]
+    total_pnl: Annotated[str, Field(default="", description="Total P&L of the vault in USD")]
+    pnl_24h: Annotated[
+        str, Field(default="", description="P&L of the vault in the last 24 hours in USD")
+    ]
+    pnl_7d: Annotated[
+        str, Field(default="", description="P&L of the vault in the last 7 days in USD")
+    ]
+    pnl_30d: Annotated[
+        str, Field(default="", description="P&L of the vault in the last 30 days in USD")
+    ]
     max_drawdown: Annotated[
         str,
         Field(
-            description="Max all time drawdown realized by the vault in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Max all time drawdown realized by the vault in percentage, i.e. 0.1 means 10%",
         ),
     ]
     max_drawdown_24h: Annotated[
         str,
         Field(
-            description="Max drawdown realized by the vault in the last 24 hours in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Max drawdown realized by the vault in the last 24 hours in percentage, i.e. 0.1 means 10%",
         ),
     ]
     max_drawdown_7d: Annotated[
         str,
         Field(
-            description="Max drawdown realized by the vault in the last 7 days in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Max drawdown realized by the vault in the last 7 days in percentage, i.e. 0.1 means 10%",
         ),
     ]
     max_drawdown_30d: Annotated[
         str,
         Field(
-            description="Max drawdown realized by the vault in the last 30 days in percentage, i.e. 0.1 means 10%"
+            default="",
+            description="Max drawdown realized by the vault in the last 30 days in percentage, i.e. 0.1 means 10%",
         ),
     ]
-    volume: Annotated[str, Field(description="All time volume traded by the vault in USD")]
+    volume: Annotated[
+        str, Field(default="", description="All time volume traded by the vault in USD")
+    ]
     volume_24h: Annotated[
-        str, Field(description="Volume traded by the vault in the last 24 hours in USD")
+        str, Field(default="", description="Volume traded by the vault in the last 24 hours in USD")
     ]
     volume_7d: Annotated[
-        str, Field(description="Volume traded by the vault in the last 7 days in USD")
+        str, Field(default="", description="Volume traded by the vault in the last 7 days in USD")
     ]
     volume_30d: Annotated[
-        str, Field(description="Volume traded by the vault in the last 30 days in USD")
+        str, Field(default="", description="Volume traded by the vault in the last 30 days in USD")
     ]
-    num_depositors: Annotated[int, Field(description="Number of depositors on the vault")]
+    num_depositors: Annotated[
+        int, Field(default=0, description="Number of depositors on the vault")
+    ]
 
 
 class VaultAccountSummary(BaseModel):
@@ -378,8 +417,8 @@ class Greeks(BaseModel):
 class MarketSummary(BaseModel):
     """Model representing a summary of a market."""
 
-    symbol: Annotated[str, Field(description="Market symbol")]
-    mark_price: Annotated[str, Field(description="Mark price")]
+    symbol: Annotated[str, Field(default="", description="Market symbol")]
+    mark_price: Annotated[str, Field(default="", description="Mark price")]
     delta: Annotated[str, Field(default="", description="Deprecated: Use greeks.delta instead")]
     greeks: Annotated[
         Greeks,
@@ -387,47 +426,54 @@ class MarketSummary(BaseModel):
             default=None, description="Greeks (delta, gamma, vega). Partial for perpetual futures"
         ),
     ]
-    last_traded_price: Annotated[str, Field(description="Last traded price")]
-    bid: Annotated[str, Field(description="Best bid price")]
-    ask: Annotated[str, Field(description="Best ask price")]
-    volume_24h: Annotated[str, Field(description="24 hour volume in USD")]
-    total_volume: Annotated[str, Field(description="Lifetime total traded volume in USD")]
-    created_at: Annotated[int, Field(description="Market summary creation time")]
-    underlying_price: Annotated[str, Field(description="Underlying asset price (spot price)")]
-    open_interest: Annotated[str, Field(description="Open interest in base currency")]
-    funding_rate: Annotated[str, Field(description="8 hour funding rate")]
+    last_traded_price: Annotated[str, Field(default="", description="Last traded price")]
+    bid: Annotated[str, Field(default="", description="Best bid price")]
+    ask: Annotated[str, Field(default="", description="Best ask price")]
+    volume_24h: Annotated[str, Field(default="", description="24 hour volume in USD")]
+    total_volume: Annotated[
+        str, Field(default="", description="Lifetime total traded volume in USD")
+    ]
+    created_at: Annotated[int, Field(default=0, description="Market summary creation time")]
+    underlying_price: Annotated[
+        str, Field(default="", description="Underlying asset price (spot price)")
+    ]
+    open_interest: Annotated[str, Field(default="", description="Open interest in base currency")]
+    funding_rate: Annotated[str, Field(default="", description="8 hour funding rate")]
     price_change_rate_24h: Annotated[
-        str, Field(description="Price change rate in the last 24 hours")
+        str, Field(default="", description="Price change rate in the last 24 hours")
     ]
 
 
 class MarketDetails(BaseModel):
     """Model representing the details of a market."""
 
-    symbol: Annotated[str, Field(description="Market symbol")]
-    base_currency: Annotated[str, Field(description="Base currency of the market")]
-    quote_currency: Annotated[str, Field(description="Quote currency of the market")]
-    settlement_currency: Annotated[str, Field(description="Settlement currency of the market")]
+    symbol: Annotated[str, Field(default="", description="Market symbol")]
+    base_currency: Annotated[str, Field(default="", description="Base currency of the market")]
+    quote_currency: Annotated[str, Field(default="", description="Quote currency of the market")]
+    settlement_currency: Annotated[
+        str, Field(default="", description="Settlement currency of the market")
+    ]
     order_size_increment: Annotated[
-        str, Field(description="Minimum size increment for base currency")
+        str, Field(default="", description="Minimum size increment for base currency")
     ]
     price_tick_size: Annotated[
-        float, Field(description="Minimum price increment of the market in USD")
+        float, Field(default=0.0, description="Minimum price increment of the market in USD")
     ]
-    min_notional: Annotated[float, Field(description="Minimum order size in USD")]
-    open_at: Annotated[int, Field(description="Market open time in milliseconds")]
-    expiry_at: Annotated[int, Field(description="Market expiry time")]
-    asset_kind: Annotated[str, Field(description="Type of asset")]
-    market_kind: Annotated[str, Field(description="Type of market - always 'cross'")]
-    position_limit: Annotated[float, Field(description="Position limit")]
+    min_notional: Annotated[float, Field(default=0.0, description="Minimum order size in USD")]
+    open_at: Annotated[int, Field(default=0, description="Market open time in milliseconds")]
+    expiry_at: Annotated[int, Field(default=0, description="Market expiry time")]
+    asset_kind: Annotated[str, Field(default="", description="Type of asset")]
+    market_kind: Annotated[str, Field(default="", description="Type of market - always 'cross'")]
+    position_limit: Annotated[float, Field(default=0.0, description="Position limit")]
     price_bands_width: Annotated[
         float,
         Field(
-            description="Price Bands Width, 0.05 means 5% price deviation allowed from mark price"
+            default=0.0,
+            description="Price Bands Width, 0.05 means 5% price deviation allowed from mark price",
         ),
     ]
-    max_open_orders: Annotated[int, Field(description="Max open orders")]
-    max_funding_rate: Annotated[float, Field(description="Max funding rate")]
+    max_open_orders: Annotated[int, Field(default=0, description="Max open orders")]
+    max_funding_rate: Annotated[float, Field(default=0.0, description="Max funding rate")]
     delta1_cross_margin_params: Annotated[
         dict[str, float], Field(default_factory=dict, description="Delta1 Cross margin parameters")
     ]
@@ -436,18 +482,29 @@ class MarketDetails(BaseModel):
         Field(default_factory=dict, description="Option Cross margin parameters"),
     ]
     price_feed_id: Annotated[
-        str, Field(description="Price feed id. Pyth price account used to price underlying asset")
+        str,
+        Field(
+            default="",
+            description="Price feed id. Pyth price account used to price underlying asset",
+        ),
     ]
-    oracle_ewma_factor: Annotated[float, Field(description="Oracle EWMA factor")]
-    max_order_size: Annotated[float, Field(description="Maximum order size in base currency")]
-    max_funding_rate_change: Annotated[float, Field(description="Max funding rate change")]
+    oracle_ewma_factor: Annotated[float, Field(default=0.0, description="Oracle EWMA factor")]
+    max_order_size: Annotated[
+        float, Field(default=0.0, description="Maximum order size in base currency")
+    ]
+    max_funding_rate_change: Annotated[
+        float, Field(default=0.0, description="Max funding rate change")
+    ]
     max_tob_spread: Annotated[
-        float, Field(description="The maximum TOB spread allowed to apply funding rate changes")
+        float,
+        Field(
+            default=0.0, description="The maximum TOB spread allowed to apply funding rate changes"
+        ),
     ]
-    interest_rate: Annotated[float, Field(description="Interest rate")]
-    clamp_rate: Annotated[float, Field(description="Clamp rate")]
-    funding_period_hours: Annotated[int, Field(description="Funding period in hours")]
-    tags: Annotated[list[str], Field(description="Market tags")]
+    interest_rate: Annotated[float, Field(default=0.0, description="Interest rate")]
+    clamp_rate: Annotated[float, Field(default=0.0, description="Clamp rate")]
+    funding_period_hours: Annotated[int, Field(default=0, description="Funding period in hours")]
+    tags: Annotated[list[str], Field(default_factory=list, description="Market tags")]
     option_type: Annotated[str, Field(default="", description="Type of option (PUT or CALL)")]
     strike_price: Annotated[float, Field(default=0.0, description="Strike price for option market")]
     iv_bands_width: Annotated[float, Field(default=0.0, description="IV Bands Width")]

@@ -1,6 +1,7 @@
 """
 Market data resources that don't require authentication.
 """
+
 import logging
 from datetime import datetime
 from typing import Any
@@ -11,14 +12,15 @@ from mcp_paradex.utils.paradex_client import get_paradex_client
 
 logger = logging.getLogger(__name__)
 
+
 @server.resource("paradex://markets")
 async def get_markets() -> dict[str, Any]:
     """
     Get a list of available markets from Paradex.
-    
+
     This endpoint doesn't require authentication and provides basic
     information about available trading pairs.
-    
+
     Returns:
         Dict[str, Any]: List of available markets.
     """
@@ -32,7 +34,7 @@ async def get_markets() -> dict[str, Any]:
             "timestamp": datetime.now().isoformat(),
             "environment": config.ENVIRONMENT,
             "markets": markets,
-            "count": len(markets)
+            "count": len(markets),
         }
     except Exception as e:
         logger.error(f"Error fetching markets: {e!s}")
@@ -42,21 +44,22 @@ async def get_markets() -> dict[str, Any]:
             "environment": config.ENVIRONMENT,
             "error": str(e),
             "markets": [],
-            "count": 0
+            "count": 0,
         }
+
 
 @server.resource("paradex://market/summary/{market_id}")
 async def get_market_summary(market_id: str) -> dict[str, Any]:
     """
     Get a summary of market information for a specific trading pair.
-    
+
     This endpoint requires authentication and provides detailed
     information about the market, including order book, ticker, and
     market statistics.
-    
+
     Args:
         market_id (str): The ID of the trading pair to get summary for.
-        
+
     Returns:
         Dict[str, Any]: Summary of market information.
     """
@@ -72,5 +75,5 @@ async def get_market_summary(market_id: str) -> dict[str, Any]:
             "timestamp": datetime.now().isoformat(),
             "environment": config.ENVIRONMENT,
             "error": str(e),
-            "summary": None
+            "summary": None,
         }

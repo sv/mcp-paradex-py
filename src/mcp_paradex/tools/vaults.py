@@ -43,7 +43,18 @@ async def get_vaults(
     jmespath_filter: str = Field(
         default=None, description="JMESPath expression to filter, sort, or limit the results."
     ),
-) -> list[Vault]:
+    limit: int = Field(
+        default=10,
+        gt=0,
+        le=100,
+        description="Limit the number of results to the specified number.",
+    ),
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset the results to the specified number.",
+    ),
+) -> dict:
     """
     Get detailed information about a specific vault or all vaults if no address is provided.
 
@@ -78,10 +89,19 @@ async def get_vaults(
                 type_adapter=vault_adapter,
                 error_logger=logger.error,
             )
-
-        return vaults
+        sorted_vaults = sorted(vaults, key=lambda x: x.created_at, reverse=True)
+        result_vaults = sorted_vaults[offset : offset + limit]
+        result = {
+            "description": Vault.__doc__.strip() if Vault.__doc__ else None,
+            "fields": Vault.model_json_schema(),
+            "vaults": result_vaults,
+            "total": len(sorted_vaults),
+            "limit": limit,
+            "offset": offset,
+        }
+        return result
     except Exception as e:
-        logger.error(f"Error fetching vault details for {vault_address}: {e!s}")
+        logger.error(f"Error fetching vault details: {e!s}")
         raise e
 
 
@@ -157,7 +177,18 @@ async def get_vault_summary(
     jmespath_filter: str = Field(
         default=None, description="JMESPath expression to filter or transform the result."
     ),
-) -> list[VaultSummary]:
+    limit: int = Field(
+        default=10,
+        gt=0,
+        le=100,
+        description="Limit the number of results to the specified number.",
+    ),
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset the results to the specified number.",
+    ),
+) -> dict:
     """
     Get a comprehensive summary of a specific vault or all vaults if no address is provided.
 
@@ -193,8 +224,17 @@ async def get_vault_summary(
                 type_adapter=vault_summary_adapter,
                 error_logger=logger.error,
             )
-
-        return summary
+        sorted_summary = sorted(summary, key=lambda x: x.address, reverse=True)
+        result_summary = sorted_summary[offset : offset + limit]
+        result = {
+            "description": VaultSummary.__doc__.strip() if VaultSummary.__doc__ else None,
+            "fields": VaultSummary.model_json_schema(),
+            "vaults": result_summary,
+            "total": len(sorted_summary),
+            "limit": limit,
+            "offset": offset,
+        }
+        return result
     except Exception as e:
         logger.error(f"Error fetching summary for vault {vault_address}: {e!s}")
         raise e

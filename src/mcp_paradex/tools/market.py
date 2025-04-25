@@ -14,6 +14,7 @@ from typing import Any, Literal
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
+from mcp_paradex import models
 from mcp_paradex.models import BBO, MarketDetails, MarketSummary, Trade
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
@@ -21,6 +22,24 @@ from mcp_paradex.utils.jmespath_utils import apply_jmespath_filter
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 
 logger = logging.getLogger(__name__)
+
+
+@server.tool(name="paradex_filters_model")
+async def get_filters_model(
+    tool_name: str = Field(description="The name of the tool to get the filters for."),
+) -> dict:
+    """
+    Get the filters for a tool.
+    """
+    tool_descriptions = {
+        "paradex_markets": models.MarketDetails.model_json_schema(),
+        "paradex_market_summaries": models.MarketSummary.model_json_schema(),
+        "paradex_open_orders": models.OrderState.model_json_schema(),
+        "paradex_orders_history": models.OrderState.model_json_schema(),
+        "paradex_vaults": models.Vault.model_json_schema(),
+        "paradex_vault_summary": models.VaultSummary.model_json_schema(),
+    }
+    return tool_descriptions[tool_name]
 
 
 market_details_adapter = TypeAdapter(list[MarketDetails])
@@ -35,6 +54,17 @@ async def get_markets(
         description="JMESPath expression to filter, sort, or limit the results.",
         default=None,
     ),
+    limit: int = Field(
+        default=10,
+        gt=0,
+        le=100,
+        description="Limit the number of results to the specified number.",
+    ),
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset the results to the specified number.",
+    ),
     ctx: Context = None,
 ) -> list[MarketDetails]:
     """
@@ -46,7 +76,7 @@ async def get_markets(
     returns details for all available markets.
 
     You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
-
+    Use the `paradex_filters_model` tool to get the filters for a tool.
     Examples:
     - Filter by base asset: "[?base_asset=='BTC']"
     - Sort by 24h volume: "sort_by([*], &volume_24h)"
@@ -70,8 +100,17 @@ async def get_markets(
                 type_adapter=market_details_adapter,
                 error_logger=ctx.error if ctx else None,
             )
-
-        return details
+        sorted_details = sorted(details, key=lambda x: x.symbol, reverse=True)
+        result_details = sorted_details[offset : offset + limit]
+        result = {
+            "description": MarketDetails.__doc__.strip() if MarketDetails.__doc__ else None,
+            "fields": MarketDetails.model_json_schema(),
+            "results": result_details,
+            "total": len(sorted_details),
+            "limit": limit,
+            "offset": offset,
+        }
+        return result
     except Exception as e:
         ctx.error(f"Error fetching market details: {e!s}")
         raise e
@@ -89,8 +128,19 @@ async def get_market_summaries(
         description="JMESPath expression to filter, sort, or limit the results.",
         default=None,
     ),
+    limit: int = Field(
+        default=10,
+        gt=0,
+        le=100,
+        description="Limit the number of results to the specified number.",
+    ),
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset the results to the specified number.",
+    ),
     ctx: Context = None,
-) -> list[MarketSummary]:
+) -> dict:
     """
     Get a summary of market statistics and current state for specific markets.
 
@@ -99,6 +149,7 @@ async def get_market_summaries(
     are provided, returns summaries for all available markets.
 
     You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
+    Use the `paradex_filters_model` tool to get the filters for a tool.
     Examples:
     - Filter by high price: "[?high_price > `10000`]"
     - Sort by volume: "sort_by([*], &volume)"
@@ -125,8 +176,17 @@ async def get_market_summaries(
                 type_adapter=market_summary_adapter,
                 error_logger=ctx.error if ctx else None,
             )
-
-        return summaries
+        sorted_summaries = sorted(summaries, key=lambda x: x.symbol, reverse=True)
+        result_summaries = sorted_summaries[offset : offset + limit]
+        result = {
+            "description": MarketSummary.__doc__.strip() if MarketSummary.__doc__ else None,
+            "fields": MarketSummary.model_json_schema(),
+            "results": result_summaries,
+            "total": len(sorted_summaries),
+            "limit": limit,
+            "offset": offset,
+        }
+        return result
     except Exception as e:
         logger.error(f"Error fetching market summaries: {e!s}")
         ctx.error(f"Error fetching market summaries: {e!s}")

@@ -45,7 +45,7 @@ def apply_jmespath_filter(
     Raises:
         ValueError: If the JMESPath filter is invalid
     """
-    if not jmespath_filter:
+    if not jmespath_filter or jmespath_filter == "null":
         return data
 
     try:
@@ -61,7 +61,7 @@ def apply_jmespath_filter(
             return type_adapter.validate_python(
                 filtered_data,
                 strict=strict,
-                experimental_allow_partial=experimental_allow_partial,
+                experimental_allow_partial="on",
             )
         else:
             return []

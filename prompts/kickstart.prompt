@@ -6,7 +6,7 @@ Build an MCP server that:
 
 
 Paradex information
-paradex docs - https://github.com/tradeparadex/paradex-docs
+paradex docs - http://docs.paradex.trade/llms-full.txt
 paradex sdk - https://github.com/tradeparadex/paradex-py
 paradex samples -  https://github.com/tradeparadex/code-samples
 Swagger API spec - https://api.prod.paradex.trade/swagger/doc.json

@@ -38,7 +38,7 @@ async def get_system_config(ctx: Context) -> SystemConfig:
         system_config = SystemConfigSchema().load(response, unknown="exclude", partial=True)
         return system_config
     except Exception as e:
-        logger.error(f"Error fetching system configuration: {e!s}")
+        await ctx.error(f"Error fetching system configuration: {e!s}")
         raise e
 
 
@@ -58,5 +58,5 @@ async def get_system_state(ctx: Context) -> SystemState:
         time = client.fetch_system_time()
         return SystemState(status=state["status"], timestamp=time["server_time"])
     except Exception as e:
-        logger.error(f"Error fetching system state: {e!s}")
+        await ctx.error(f"Error fetching system state: {e!s}")
         raise e

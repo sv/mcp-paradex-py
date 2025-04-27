@@ -96,7 +96,7 @@ def create_optimal_order(
     side: str,
     risk_percent: float = 1.0,
     urgency: str = "normal",
-    order_type: str = None,
+    order_type: str = "",
 ) -> str:
     """Generate optimized order parameters based on market conditions and risk management"""
     order_type_str = f", order_type={order_type}" if order_type else ""

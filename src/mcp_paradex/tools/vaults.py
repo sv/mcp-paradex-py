@@ -9,9 +9,9 @@ positions, and transaction history.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Annotated, Any
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import Field, TypeAdapter
 
 from mcp_paradex.models import (
     Position,
@@ -36,24 +36,36 @@ vault_adapter = TypeAdapter(list[Vault])
 
 @server.tool(name="paradex_vaults")
 async def get_vaults(
-    vault_address: str = Field(
-        default="",
-        description="The address of the vault to get details for or empty string to get all vaults.",
-    ),
-    jmespath_filter: str = Field(
-        default=None, description="JMESPath expression to filter, sort, or limit the results."
-    ),
-    limit: int = Field(
-        default=10,
-        gt=0,
-        le=100,
-        description="Limit the number of results to the specified number.",
-    ),
-    offset: int = Field(
-        default=0,
-        ge=0,
-        description="Offset the results to the specified number.",
-    ),
+    vault_address: Annotated[
+        str,
+        Field(
+            default="",
+            description="The address of the vault to get details for or empty string to get all vaults.",
+        ),
+    ],
+    jmespath_filter: Annotated[
+        str,
+        Field(
+            default=None, description="JMESPath expression to filter, sort, or limit the results."
+        ),
+    ],
+    limit: Annotated[
+        int,
+        Field(
+            default=10,
+            gt=0,
+            le=100,
+            description="Limit the number of results to the specified number.",
+        ),
+    ],
+    offset: Annotated[
+        int,
+        Field(
+            default=0,
+            ge=0,
+            description="Offset the results to the specified number.",
+        ),
+    ],
 ) -> dict:
     """
     Get detailed information about a specific vault or all vaults if no address is provided.
@@ -105,43 +117,14 @@ async def get_vaults(
         raise e
 
 
-class VaultConfig(BaseModel):
-    """Vault configuration model."""
-
-    vault_factory_address: str
-    max_profit_share_percentage: str
-    min_lockup_period_days: str
-    max_lockup_period_days: str
-    min_initial_deposit: str
-    min_owner_share_percentage: str
-
-
-@server.tool(name="paradex_vaults_config")
-async def get_vaults_config() -> VaultConfig:
-    """
-    Get global configuration for vaults from Paradex.
-
-    Retrieves system-wide configuration parameters for vaults on Paradex,
-    including fee structures, limits, and other global settings that apply
-    to all vaults on the platform.
-    """
-    try:
-        client = await get_paradex_client()
-        response = await api_call(client, "vaults/config")
-        config = VaultConfig.model_validate(response)
-        return config
-
-    except Exception as e:
-        logger.error(f"Error fetching vaults configuration: {e!s}")
-        raise e
-
-
 vault_balance_adapter = TypeAdapter(list[VaultBalance])
 
 
 @server.tool(name="paradex_vault_balance")
 async def get_vault_balance(
-    vault_address: str = Field(description="The address of the vault to get balance for."),
+    vault_address: Annotated[
+        str, Field(description="The address of the vault to get balance for.")
+    ],
 ) -> list[VaultBalance]:
     """
     Get the current balance of a specific vault.
@@ -170,24 +153,34 @@ vault_summary_adapter = TypeAdapter(list[VaultSummary])
 
 @server.tool(name="paradex_vault_summary")
 async def get_vault_summary(
-    vault_address: str = Field(
-        default=None,
-        description="The address of the vault to get summary for or None to get all vaults.",
-    ),
-    jmespath_filter: str = Field(
-        default=None, description="JMESPath expression to filter or transform the result."
-    ),
-    limit: int = Field(
-        default=10,
-        gt=0,
-        le=100,
-        description="Limit the number of results to the specified number.",
-    ),
-    offset: int = Field(
-        default=0,
-        ge=0,
-        description="Offset the results to the specified number.",
-    ),
+    vault_address: Annotated[
+        str,
+        Field(
+            default=None,
+            description="The address of the vault to get summary for or None to get all vaults.",
+        ),
+    ],
+    jmespath_filter: Annotated[
+        str,
+        Field(default=None, description="JMESPath expression to filter or transform the result."),
+    ],
+    limit: Annotated[
+        int,
+        Field(
+            default=10,
+            gt=0,
+            le=100,
+            description="Limit the number of results to the specified number.",
+        ),
+    ],
+    offset: Annotated[
+        int,
+        Field(
+            default=0,
+            ge=0,
+            description="Offset the results to the specified number.",
+        ),
+    ],
 ) -> dict:
     """
     Get a comprehensive summary of a specific vault or all vaults if no address is provided.
@@ -242,8 +235,10 @@ async def get_vault_summary(
 
 @server.tool(name="paradex_vault_transfers")
 async def get_vault_transfers(
-    vault_address: str = Field(description="The address of the vault to get transfers for."),
-) -> Dict[str, Any]:
+    vault_address: Annotated[
+        str, Field(description="The address of the vault to get transfers for.")
+    ],
+) -> dict[str, Any]:
     """
     Get a list of deposit and withdrawal transfers for a specific vault.
 
@@ -289,7 +284,9 @@ position_adapter = TypeAdapter(list[Position])
 
 @server.tool(name="paradex_vault_positions")
 async def get_vault_positions(
-    vault_address: str = Field(description="The address of the vault to get positions for."),
+    vault_address: Annotated[
+        str, Field(description="The address of the vault to get positions for.")
+    ],
 ) -> list[Position]:
     """
     Get a list of current trading positions for a specific vault.
@@ -313,7 +310,9 @@ vault_account_summary_adapter = TypeAdapter(list[VaultAccountSummary])
 
 @server.tool(name="paradex_vault_account_summary")
 async def get_vault_account_summary(
-    vault_address: str = Field(description="The address of the vault to get account summary for."),
+    vault_address: Annotated[
+        str, Field(description="The address of the vault to get account summary for.")
+    ],
 ) -> list[VaultAccountSummary]:
     """
     Get a summary of trading account information for a specific vault.

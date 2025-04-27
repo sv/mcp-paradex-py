@@ -2,12 +2,8 @@
 System status and health check resources.
 """
 
-import os
-import sys
 from datetime import datetime
 from typing import Any
-
-import pkg_resources
 
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config

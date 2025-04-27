@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -59,7 +59,7 @@ def serialize_model_with_descriptions(instance: BaseModel) -> dict:
 T = TypeVar("T", bound=BaseModel)  # Generic type for the model
 
 
-def compress_model_list(model_list: List[T]) -> Optional[Dict[str, Any]]:
+def compress_model_list(model_list: list[T]) -> dict[str, Any] | None:
     """
     Compresses a list of Pydantic models by extracting common field values.
 
@@ -121,7 +121,7 @@ def compress_model_list(model_list: List[T]) -> Optional[Dict[str, Any]]:
 # --- Decompression Logic ---
 
 
-def decompress_to_models(compressed_data: Dict[str, Any], model_class: Type[T]) -> List[T]:
+def decompress_to_models(compressed_data: dict[str, Any], model_class: type[T]) -> list[T]:
     """
     Reconstructs a list of Pydantic model instances from the compressed format.
 

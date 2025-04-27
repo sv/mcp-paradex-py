@@ -3,7 +3,7 @@ Order management tools.
 """
 
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Annotated, Any
 
 from mcp.server.fastmcp.server import Context
 from paradex_py.common.order import Order, OrderSide, OrderType
@@ -18,7 +18,7 @@ order_state_adapter = TypeAdapter(list[OrderState])
 
 @server.tool(name="paradex_open_orders")
 async def get_open_orders(
-    market_id: str = Field(default="ALL", description="Filter by market."),
+    market_id: Annotated[str, Field(default="ALL", description="Filter by market.")],
     ctx: Context = None,
 ) -> list[OrderState]:
     """
@@ -36,17 +36,19 @@ async def get_open_orders(
 
 @server.tool(name="paradex_create_order")
 async def create_order(
-    market_id: str = Field(description="Market identifier."),
-    order_side: OrderSideEnum = Field(description="Order side."),
-    order_type: OrderTypeEnum = Field(description="Order type."),
-    size: float = Field(description="Order size."),
-    price: float = Field(description="Order price (required for LIMIT orders)."),
-    trigger_price: float = Field(description="Trigger price (required for STOP_LIMIT orders)."),
-    instruction: InstructionEnum = Field(
-        default="GTC", description="Instruction for order execution."
-    ),
-    reduce_only: bool = Field(default=False, description="Reduce-only flag."),
-    client_id: str = Field(description="Client-specified order ID."),
+    market_id: Annotated[str, Field(description="Market identifier.")],
+    order_side: Annotated[OrderSideEnum, Field(description="Order side.")],
+    order_type: Annotated[OrderTypeEnum, Field(description="Order type.")],
+    size: Annotated[float, Field(description="Order size.")],
+    price: Annotated[float, Field(description="Order price (required for LIMIT orders).")],
+    trigger_price: Annotated[
+        float, Field(description="Trigger price (required for STOP_LIMIT orders).")
+    ],
+    instruction: Annotated[
+        InstructionEnum, Field(default="GTC", description="Instruction for order execution.")
+    ],
+    reduce_only: Annotated[bool, Field(default=False, description="Reduce-only flag.")],
+    client_id: Annotated[str, Field(description="Client-specified order ID.")],
     ctx: Context = None,
 ) -> OrderState:
     """
@@ -73,9 +75,9 @@ async def create_order(
 
 @server.tool(name="paradex_cancel_orders")
 async def cancel_orders(
-    order_id: str = Field(default="", description="Order identifier."),
-    client_id: str = Field(default="", description="Client-specified order ID."),
-    market_id: str = Field(default="ALL", description="Market identifier."),
+    order_id: Annotated[str, Field(default="", description="Order identifier.")],
+    client_id: Annotated[str, Field(default="", description="Client-specified order ID.")],
+    market_id: Annotated[str, Field(default="ALL", description="Market identifier.")],
     ctx: Context = None,
 ) -> OrderState:
     """
@@ -101,8 +103,8 @@ async def cancel_orders(
 
 @server.tool(name="paradex_order_status")
 async def get_order_status(
-    order_id: str = Field(description="Order identifier."),
-    client_id: str = Field(description="Client-specified order ID."),
+    order_id: Annotated[str, Field(description="Order identifier.")],
+    client_id: Annotated[str, Field(description="Client-specified order ID.")],
     ctx: Context = None,
 ) -> OrderState:
     """
@@ -121,9 +123,9 @@ async def get_order_status(
 
 @server.tool(name="paradex_orders_history")
 async def get_orders_history(
-    market_id: str = Field(description="Filter by market."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str, Field(description="Filter by market.")],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
 ) -> list[OrderState]:
     """
@@ -138,7 +140,7 @@ async def get_orders_history(
     params = {k: v for k, v in params.items() if v is not None}
     response = client.fetch_orders_history(params=params)
     if "error" in response:
-        ctx.logger.error(f"Error fetching orders history: {response['error']}")
+        await ctx.error(response)
         raise Exception(response["error"])
     orders_raw: list[dict[str, Any]] = response["results"]
     orders: list[OrderState] = [OrderState(**order) for order in orders_raw]

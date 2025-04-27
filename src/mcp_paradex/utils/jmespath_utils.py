@@ -6,7 +6,8 @@ including validation, filtering, and error handling.
 """
 
 import logging
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import jmespath
 from jmespath.exceptions import ParseError
@@ -18,13 +19,12 @@ T = TypeVar("T")
 
 
 def apply_jmespath_filter(
-    data: List[T],
-    jmespath_filter: Optional[str],
+    data: list[T],
+    jmespath_filter: str | None,
     type_adapter: TypeAdapter,
-    error_logger: Optional[Callable[[str], Any]] = None,
+    error_logger: Callable[[str], Any] | None = None,
     strict: bool = False,
-    experimental_allow_partial: bool = True,
-) -> List[T]:
+) -> list[T]:
     """
     Apply a JMESPath filter to a list of data objects.
 

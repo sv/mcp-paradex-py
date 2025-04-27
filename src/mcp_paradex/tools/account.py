@@ -2,6 +2,8 @@
 Account management tools.
 """
 
+from typing import Annotated
+
 from mcp.server.fastmcp.server import Context
 from pydantic import Field, TypeAdapter
 
@@ -25,17 +27,23 @@ position_adapter = TypeAdapter(list[Position])
 
 
 @server.tool(name="paradex_account_positions")
-async def get_account_positions(ctx: Context) -> list[Position]:
+async def get_account_positions(ctx: Context) -> dict:
     """
     Get account positions.
     """
     client = await get_authenticated_paradex_client()
     response = client.fetch_positions()
     if "error" in response:
-        ctx.error(response["error"])
+        await ctx.error(response)
         raise Exception(response["error"])
     positions = position_adapter.validate_python(response["results"])
-    return positions
+
+    results = {
+        "description": Position.__doc__.strip() if Position.__doc__ else None,
+        "fields": Position.model_json_schema(),
+        "results": positions,
+    }
+    return results
 
 
 fill_adapter = TypeAdapter(list[Fill])
@@ -43,11 +51,11 @@ fill_adapter = TypeAdapter(list[Fill])
 
 @server.tool(name="paradex_account_fills")
 async def get_account_fills(
-    market_id: str = Field(description="Filter by market ID."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str, Field(description="Filter by market ID.")],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
-) -> list[Fill]:
+) -> dict:
     """
     Get account fills.
     """
@@ -55,17 +63,22 @@ async def get_account_fills(
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
     response = client.fetch_fills(params)
     if "error" in response:
-        ctx.error(response["error"])
+        await ctx.error(response)
         raise Exception(response["error"])
-    fills = [Fill(**fill) for fill in response["results"]]
-    return fills
+    fills = fill_adapter.validate_python(response["results"])
+    results = {
+        "description": Fill.__doc__.strip() if Fill.__doc__ else None,
+        "fields": Fill.model_json_schema(),
+        "results": fills,
+    }
+    return results
 
 
 @server.tool(name="paradex_account_funding_payments")
 async def get_account_funding_payments(
-    market_id: str | None = Field(default=None, description="Filter by market ID."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str | None, Field(default=None, description="Filter by market ID.")],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
 ) -> dict:
     """
@@ -87,10 +100,14 @@ transaction_adapter = TypeAdapter(list[Transaction])
 
 @server.tool(name="paradex_account_transactions")
 async def get_account_transactions(
-    transaction_type: str | None = Field(default=None, description="Filter by transaction type."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
-    limit: int = Field(default=50, description="Maximum number of transactions to return."),
+    transaction_type: Annotated[
+        str | None, Field(default=None, description="Filter by transaction type.")
+    ],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
+    limit: Annotated[
+        int, Field(default=50, description="Maximum number of transactions to return.")
+    ],
     ctx: Context = None,
 ) -> list[Transaction]:
     """
@@ -119,7 +136,12 @@ async def get_account_transactions(
     params = {k: v for k, v in params.items() if v is not None}
     response = client.fetch_transactions(params)
     if "error" in response:
-        ctx.error(response["error"])
+        await ctx.error(response)
         raise Exception(response["error"])
     transactions = transaction_adapter.validate_python(response["results"])
-    return transactions
+    results = {
+        "description": Transaction.__doc__.strip() if Transaction.__doc__ else None,
+        "fields": Transaction.model_json_schema(),
+        "results": transactions,
+    }
+    return results

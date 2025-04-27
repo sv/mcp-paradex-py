@@ -9,7 +9,7 @@ None of these tools require authentication.
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 @server.tool(name="paradex_filters_model")
 async def get_filters_model(
-    tool_name: str = Field(description="The name of the tool to get the filters for."),
+    tool_name: Annotated[str, Field(description="The name of the tool to get the filters for.")],
 ) -> dict:
     """
     Get the filters for a tool.
@@ -47,24 +47,33 @@ market_details_adapter = TypeAdapter(list[MarketDetails])
 
 @server.tool(name="paradex_markets")
 async def get_markets(
-    market_ids: list[str] = Field(
-        description="Market symbols to get details for.", default=["ALL"]
-    ),
-    jmespath_filter: str = Field(
-        description="JMESPath expression to filter, sort, or limit the results.",
-        default="",
-    ),
-    limit: int = Field(
-        default=10,
-        gt=0,
-        le=100,
-        description="Limit the number of results to the specified number.",
-    ),
-    offset: int = Field(
-        default=0,
-        ge=0,
-        description="Offset the results to the specified number.",
-    ),
+    market_ids: Annotated[
+        list[str], Field(description="Market symbols to get details for.", default=["ALL"])
+    ],
+    jmespath_filter: Annotated[
+        str,
+        Field(
+            description="JMESPath expression to filter, sort, or limit the results.",
+            default="",
+        ),
+    ],
+    limit: Annotated[
+        int,
+        Field(
+            default=10,
+            gt=0,
+            le=100,
+            description="Limit the number of results to the specified number.",
+        ),
+    ],
+    offset: Annotated[
+        int,
+        Field(
+            default=0,
+            ge=0,
+            description="Offset the results to the specified number.",
+        ),
+    ],
     ctx: Context = None,
 ) -> list[MarketDetails]:
     """
@@ -87,6 +96,7 @@ async def get_markets(
 
         response = client.fetch_markets()
         if "error" in response:
+            await ctx.error(response)
             raise Exception(response["error"])
         details = market_details_adapter.validate_python(response["results"])
         if market_ids and "ALL" not in market_ids:
@@ -112,7 +122,7 @@ async def get_markets(
         }
         return result
     except Exception as e:
-        ctx.error(f"Error fetching market details: {e!s}")
+        await ctx.error(f"Error fetching market details: {e!s}")
         raise e
 
 
@@ -121,24 +131,33 @@ market_summary_adapter = TypeAdapter(list[MarketSummary])
 
 @server.tool(name="paradex_market_summaries")
 async def get_market_summaries(
-    market_ids: list[str] = Field(
-        description="Market symbols to get summaries for.", default=["ALL"]
-    ),
-    jmespath_filter: str = Field(
-        description="JMESPath expression to filter, sort, or limit the results.",
-        default=None,
-    ),
-    limit: int = Field(
-        default=10,
-        gt=0,
-        le=100,
-        description="Limit the number of results to the specified number.",
-    ),
-    offset: int = Field(
-        default=0,
-        ge=0,
-        description="Offset the results to the specified number.",
-    ),
+    market_ids: Annotated[
+        list[str], Field(description="Market symbols to get summaries for.", default=["ALL"])
+    ],
+    jmespath_filter: Annotated[
+        str,
+        Field(
+            description="JMESPath expression to filter, sort, or limit the results.",
+            default=None,
+        ),
+    ],
+    limit: Annotated[
+        int,
+        Field(
+            default=10,
+            gt=0,
+            le=100,
+            description="Limit the number of results to the specified number.",
+        ),
+    ],
+    offset: Annotated[
+        int,
+        Field(
+            default=0,
+            ge=0,
+            description="Offset the results to the specified number.",
+        ),
+    ],
     ctx: Context = None,
 ) -> dict:
     """
@@ -160,6 +179,7 @@ async def get_market_summaries(
         client = await get_paradex_client()
         response = client.fetch_markets_summary(params={"market": "ALL"})
         if "error" in response:
+            await ctx.error(response)
             raise Exception(response["error"])
 
         # Try to validate directly now that the model is more flexible
@@ -189,15 +209,15 @@ async def get_market_summaries(
         return result
     except Exception as e:
         logger.error(f"Error fetching market summaries: {e!s}")
-        ctx.error(f"Error fetching market summaries: {e!s}")
+        await ctx.error(f"Error fetching market summaries: {e!s}")
         raise e
 
 
 @server.tool(name="paradex_funding_data")
 async def get_funding_data(
-    market_id: str = Field(description="Market symbol to get funding data for."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str, Field(description="Market symbol to get funding data for.")],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
 ) -> dict[str, Any]:
     """
     Get historical funding rate data for a perpetual market.
@@ -241,10 +261,11 @@ class OrderbookDepth(int, Enum):
 
 @server.tool(name="paradex_orderbook")
 async def get_orderbook(
-    market_id: str = Field(description="Market symbol to get orderbook for."),
-    depth: int = Field(
-        default=OrderbookDepth.MEDIUM, description="The depth of the orderbook to retrieve."
-    ),
+    market_id: Annotated[str, Field(description="Market symbol to get orderbook for.")],
+    depth: Annotated[
+        int,
+        Field(default=OrderbookDepth.MEDIUM, description="The depth of the orderbook to retrieve."),
+    ],
     ctx: Context = None,
 ) -> dict[str, Any]:
     """
@@ -273,7 +294,7 @@ async def get_orderbook(
         response = client.fetch_orderbook(market_id, params={"depth": depth})
         return response
     except Exception as e:
-        ctx.error(f"Error fetching orderbook for {market_id}: {e!s}")
+        await ctx.error(f"Error fetching orderbook for {market_id}: {e!s}")
         return {
             "success": False,
             "timestamp": datetime.now().isoformat(),
@@ -302,12 +323,12 @@ ohlcv_adapter = TypeAdapter(list[OHLCV])
 
 @server.tool(name="paradex_klines")
 async def get_klines(
-    market_id: str = Field(description="Market symbol to get klines for."),
-    resolution: KLinesResolutionEnum = Field(
-        default=1, description="The time resolution of the klines."
-    ),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str, Field(description="Market symbol to get klines for.")],
+    resolution: Annotated[
+        KLinesResolutionEnum, Field(default=1, description="The time resolution of the klines.")
+    ],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
 ) -> list[OHLCV]:
     """
@@ -346,7 +367,7 @@ async def get_klines(
         ]
         return list_of_ohlcv
     except Exception as e:
-        ctx.error(f"Error fetching klines for {market_id}: {e!s}")
+        await ctx.error(f"Error fetching klines for {market_id}: {e!s}")
         raise e
 
 
@@ -355,9 +376,9 @@ trade_adapter = TypeAdapter(list[Trade])
 
 @server.tool(name="paradex_trades")
 async def get_trades(
-    market_id: str = Field(description="Market symbol to get trades for."),
-    start_unix_ms: int = Field(description="Start time in unix milliseconds."),
-    end_unix_ms: int = Field(description="End time in unix milliseconds."),
+    market_id: Annotated[str, Field(description="Market symbol to get trades for.")],
+    start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
+    end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
 ) -> list[Trade]:
     """
@@ -372,16 +393,23 @@ async def get_trades(
         response = client.fetch_trades(
             params={"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
         )
+        if "error" in response:
+            raise Exception(response["error"])
         trades = trade_adapter.validate_python(response["results"])
-        return trades
+        results = {
+            "description": Trade.__doc__.strip() if Trade.__doc__ else None,
+            "fields": Trade.model_json_schema(),
+            "results": trades,
+        }
+        return results
     except Exception as e:
-        ctx.error(f"Error fetching trades for {market_id}: {e!s}")
+        await ctx.error(f"Error fetching trades for {market_id}: {e!s}")
         raise e
 
 
 @server.tool(name="paradex_bbo")
 async def get_bbo(
-    market_id: str = Field(description="Market symbol to get BBO for."),
+    market_id: Annotated[str, Field(description="Market symbol to get BBO for.")],
     ctx: Context = None,
 ) -> BBO:
     """
@@ -396,7 +424,12 @@ async def get_bbo(
         client = await get_paradex_client()
         response = client.fetch_bbo(market_id)
         bbo = BBO(**response)
-        return bbo
+        results = {
+            "description": BBO.__doc__.strip() if BBO.__doc__ else None,
+            "fields": BBO.model_json_schema(),
+            "results": bbo,
+        }
+        return results
     except Exception as e:
-        ctx.error(f"Error fetching BBO for {market_id}: {e!s}")
+        await ctx.error(f"Error fetching BBO for {market_id}: {e!s}")
         raise e

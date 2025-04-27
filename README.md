@@ -195,6 +195,29 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 - `paradex_vault_positions` - Get current trading positions for a vault with market, size, entry price details
 - `paradex_vault_account_summary` - Get trading account information for a vault including margin and risk metrics
 
+## Trading Analysis Prompts
+
+This MCP server provides structured prompts that AI assistants can use to perform complex trading analysis and generate trading strategies.
+
+### Market Analysis
+
+- `market_overview` - Get comprehensive overview of the crypto market, including top gainers/losers, high-volume markets, funding rate anomalies, and market microstructure analysis
+- `market_analysis` - Detailed technical and microstructure analysis of a specific market, with support/resistance levels, chart patterns, orderbook analysis, and position recommendations
+
+### Position and Portfolio Management
+
+- `position_management` - Comprehensive analysis of existing positions, including portfolio heat, correlation, risk metrics, and specific recommendations for profit-taking and loss management
+- `create_optimal_order` - Design optimal order parameters for a market based on volatility, liquidity, risk tolerance, and ideal entry strategy
+- `hedging_strategy` - Develop effective hedging strategies for specific positions using correlation analysis, hedge ratio calculation, and implementation planning
+- `portfolio_risk_assessment` - Thorough risk analysis of trading portfolio, including exposure analysis, correlation assessment, VaR calculations, and risk reduction recommendations
+- `liquidation_protection` - Identify and mitigate liquidation risks for open positions with severity classification and protection strategies
+
+### Investment Strategies
+
+- `vault_analysis` - Comprehensive analysis of vaults for investment decision-making, with performance metrics, risk profiles, and suitability assessment
+- `funding_rate_opportunity` - Identify and evaluate funding rate arbitrage opportunities across markets, including yield calculations and implementation strategies
+- `trading_consultation` - Interactive prompt sequence for personalized trading advice and consultation
+
 ## Contributing
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information on how to contribute to this project, development setup, and our coding standards.

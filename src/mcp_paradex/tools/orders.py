@@ -92,7 +92,7 @@ async def cancel_orders(
     elif client_id:
         response = client.cancel_order_by_client_id(client_id)
     elif market_id:
-        response = client.cancel_orders(market_id)
+        response = client.cancel_all_orders(market_id)
     else:
         raise Exception("Either order_id or client_id must be provided.")
     order = OrderState(**response)

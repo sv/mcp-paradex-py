@@ -52,7 +52,7 @@ async def get_markets(
     ),
     jmespath_filter: str = Field(
         description="JMESPath expression to filter, sort, or limit the results.",
-        default=None,
+        default="",
     ),
     limit: int = Field(
         default=10,

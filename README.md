@@ -27,27 +27,6 @@ To install mcp-paradex-py for Claude Desktop automatically via [Smithery](https:
 npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
 ```
 
-### Using pip
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/sv/mcp-paradex-py.git
-   cd mcp-paradex-py
-   ```
-
-2. Create a virtual environment:
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. Install dependencies:
-   ```bash
-   pip install -e .
-   ```
-
 ### Using uv (faster alternative)
 
 1. Clone this repository:
@@ -154,20 +133,24 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### System Resources
 
-- `system://status` - Get the current status of the system and Paradex connection
-- `system://version` - Get detailed version information about the server and dependencies
-- `system://health` - Perform a basic health check of the server
+- `paradex://system/config` - Get Paradex system configuration and basic information about the exchange
+- `paradex://system/time` - Get current system time in milliseconds since epoch
+- `paradex://system/state` - Get the current Paradex system operational state
 
 #### Market Resources
 
-- `market://public/markets` - Get a list of available markets from Paradex
-- `market://public/info` - Get general market information and status
+- `paradex://markets` - Get a list of available markets from Paradex
+- `paradex://market/summary/{market_id}` - Get detailed market information for a specific trading pair
 
 #### Vault Resources
 
-- `vaults://list` - List all vaults associated with the account
-- `vaults://balance` - Get the balance of a specific vault
-- `vaults://details` - Get detailed information about a vault
+- `paradex://vaults` - List all vaults available on Paradex
+- `paradex://vaults/config` - Get global configuration for vaults
+- `paradex://vaults/balance/{vault_id}` - Get the balance of a specific vault
+- `paradex://vaults/summary/{vault_id}` - Get comprehensive summary of a vault
+- `paradex://vaults/transfers/{vault_id}` - Get deposit and withdrawal history for a vault
+- `paradex://vaults/positions/{vault_id}` - Get current trading positions for a vault
+- `paradex://vaults/account-summary/{vault_id}` - Get trading account information for a vault
 
 ### Tools
 

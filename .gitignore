@@ -28,3 +28,4 @@ htmlcov/
 *.swo
 prompts/paradex-openapi.json
 llms-full.txt
+mcp-reports

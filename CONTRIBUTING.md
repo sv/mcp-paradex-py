@@ -174,3 +174,7 @@ datamodel-codegen  --input prompts/paradex-openapi.json --use-annotated --use-de
 5. Open a Pull Request
 
 Please make sure your code follows the existing style and passes all tests and linters before submitting a PR.
+
+## Evals
+
+[MCP Testing Framework](https://github.com/L-Qun/mcp-testing-framework)

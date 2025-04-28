@@ -28,7 +28,7 @@ async def get_open_orders(
     params = {"market": market_id} if market_id != "" and market_id != "ALL" else None
     response = client.fetch_orders(params=params)
     if "error" in response:
-        ctx.logger.error(f"Error fetching open orders: {response['error']}")
+        ctx.error(f"Error fetching open orders: {response['error']}")
         raise Exception(response["error"])
     orders = order_state_adapter.validate_python(response["results"])
     return orders

@@ -7,7 +7,6 @@ None of these tools require authentication.
 """
 
 import logging
-from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal
 
@@ -15,7 +14,7 @@ from mcp.server.fastmcp.server import Context
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex import models
-from mcp_paradex.models import BBO, MarketDetails, MarketSummary, Trade
+from mcp_paradex.models import BBO, FundingData, MarketDetails, MarketSummary, Trade
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.config import config
 from mcp_paradex.utils.jmespath_utils import apply_jmespath_filter
@@ -75,7 +74,7 @@ async def get_markets(
         ),
     ],
     ctx: Context = None,
-) -> list[MarketDetails]:
+) -> dict:
     """
     Get detailed information about specific markets.
 
@@ -215,11 +214,15 @@ async def get_market_summaries(
         raise e
 
 
+funding_data_adapter = TypeAdapter(list[FundingData])
+
+
 @server.tool(name="paradex_funding_data")
 async def get_funding_data(
     market_id: Annotated[str, Field(description="Market symbol to get funding data for.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
     end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
+    ctx: Context = None,
 ) -> dict[str, Any]:
     """
     Get historical funding rate data for a perpetual market.
@@ -227,15 +230,6 @@ async def get_funding_data(
     Retrieves funding rate history for a specified time period, which is
     essential for understanding the cost of holding perpetual positions.
 
-
-    Returns:
-        Dict[str, Any]: Historical funding rate data with timestamps.
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - funding_data (None): Null value for funding data
     """
     try:
         # Get funding data from Paradex
@@ -244,11 +238,18 @@ async def get_funding_data(
             params={"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
         )
         if "error" in response:
+            await ctx.error(response)
             raise Exception(response["error"])
-        return response["results"]
+        funding_data = funding_data_adapter.validate_python(response["results"])
+        results = {
+            "description": FundingData.__doc__.strip() if FundingData.__doc__ else None,
+            "fields": FundingData.model_json_schema(),
+            "results": funding_data,
+        }
+        return results
     except Exception as e:
-        logger.error(f"Error fetching funding data for {market_id}: {e!s}")
-        return e
+        await ctx.error(f"Error fetching funding data for {market_id}: {e!s}")
+        raise e
 
 
 class OrderbookDepth(int, Enum):
@@ -276,19 +277,6 @@ async def get_orderbook(
     Retrieves the current state of the orderbook for a specified market,
     showing bid and ask orders up to the requested depth.
 
-
-    Returns:
-        Dict[str, Any]: Orderbook data including:
-            - bids: List of [price, size] pairs
-            - asks: List of [price, size] pairs
-            - timestamp
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - orderbook (None): Null value for orderbook
     """
     try:
         # Get orderbook from Paradex
@@ -297,13 +285,7 @@ async def get_orderbook(
         return response
     except Exception as e:
         await ctx.error(f"Error fetching orderbook for {market_id}: {e!s}")
-        return {
-            "success": False,
-            "timestamp": datetime.now().isoformat(),
-            "environment": config.ENVIRONMENT,
-            "error": str(e),
-            "orderbook": None,
-        }
+        raise e
 
 
 KLinesResolutionEnum = Literal[1, 3, 5, 15, 30, 60]
@@ -382,7 +364,7 @@ async def get_trades(
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
     end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
-) -> list[Trade]:
+) -> dict:
     """
     Get recent trades for a market.
 
@@ -413,7 +395,7 @@ async def get_trades(
 async def get_bbo(
     market_id: Annotated[str, Field(description="Market symbol to get BBO for.")],
     ctx: Context = None,
-) -> BBO:
+) -> dict:
     """
     Get the Best Bid and Offer (BBO) for a market.
 

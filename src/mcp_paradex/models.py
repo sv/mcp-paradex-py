@@ -541,3 +541,19 @@ class AccountSummary(BaseModel):
     status: Annotated[str, Field(description="Status of the acc - like ACTIVE, LIQUIDATION")]
     total_collateral: Annotated[str, Field(description="User's total collateral")]
     updated_at: Annotated[int, Field(description="Account last updated time")]
+
+
+class FundingData(BaseModel):
+    """Model representing funding data for a perpetual market."""
+
+    market: Annotated[str, Field(description="Market represents the market identifier")]
+    created_at: Annotated[
+        int, Field(description="Timestamp in milliseconds when the funding data was created")
+    ]
+    funding_index: Annotated[
+        str, Field(description="Current funding index value as a decimal string")
+    ]
+    funding_premium: Annotated[
+        str, Field(description="Current funding premium as a decimal string")
+    ]
+    funding_rate: Annotated[str, Field(description="Current funding rate as a decimal string")]

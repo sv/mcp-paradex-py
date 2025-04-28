@@ -218,6 +218,25 @@ This MCP server provides structured prompts that AI assistants can use to perfor
 - `funding_rate_opportunity` - Identify and evaluate funding rate arbitrage opportunities across markets, including yield calculations and implementation strategies
 - `trading_consultation` - Interactive prompt sequence for personalized trading advice and consultation
 
+## Documentation MCP
+
+We have seen significantly better results with giving client access to Paradex documentation
+
+```json
+"paradex-docs-mcp": {
+   "command": "uvx",
+   "args": [
+      "--from",
+      "mcpdoc",
+      "mcpdoc",
+      "--urls",
+      "Paradex:https://docs.paradex.trade/llms.txt",
+      "--transport",
+      "stdio"
+   ]
+}
+```
+
 ## Contributing
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information on how to contribute to this project, development setup, and our coding standards.

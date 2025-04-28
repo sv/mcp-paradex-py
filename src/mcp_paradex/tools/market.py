@@ -84,6 +84,8 @@ async def get_markets(
     trading parameters. If "ALL" is specified or no market IDs are provided,
     returns details for all available markets.
 
+    `asset_kind` is the type of asset in the market. It can be `PERP` or `PERP_OPTION`.
+
     You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
     Use the `paradex_filters_model` tool to get the filters for a tool.
     Examples:

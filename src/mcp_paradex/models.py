@@ -461,7 +461,9 @@ class MarketDetails(BaseModel):
     min_notional: Annotated[float, Field(default=0.0, description="Minimum order size in USD")]
     open_at: Annotated[int, Field(default=0, description="Market open time in milliseconds")]
     expiry_at: Annotated[int, Field(default=0, description="Market expiry time")]
-    asset_kind: Annotated[str, Field(default="", description="Type of asset")]
+    asset_kind: Annotated[
+        str, Field(default="", description="Type of asset", examples=["PERP", "PERP_OPTION"])
+    ]
     market_kind: Annotated[str, Field(default="", description="Type of market - always 'cross'")]
     position_limit: Annotated[float, Field(default=0.0, description="Position limit")]
     price_bands_width: Annotated[

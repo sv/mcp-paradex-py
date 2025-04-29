@@ -544,16 +544,30 @@ class AccountSummary(BaseModel):
 
 
 class FundingData(BaseModel):
-    """Model representing funding data for a perpetual market."""
+    """
+    Model representing funding data for a perpetual market.
+    https://docs.paradex.trade/documentation/risk-system/funding-mechanism
+    """
 
     market: Annotated[str, Field(description="Market represents the market identifier")]
     created_at: Annotated[
-        int, Field(description="Timestamp in milliseconds when the funding data was created")
+        int, Field(description="Timestamp in milliseconds when the funding data was calculated")
     ]
     funding_index: Annotated[
-        str, Field(description="Current funding index value as a decimal string")
+        str,
+        Field(
+            description="Funding Index is accrued funding for 1 unit of the asset since market launchs and is calculated as a time-weighted sum of the Funding Premium. This value expressed in the settlement asset of the instrument (USDC)"
+        ),
     ]
     funding_premium: Annotated[
-        str, Field(description="Current funding premium as a decimal string")
+        str,
+        Field(
+            description="Funding Premium represents the 8h amount paid by long positions to short positions. This value expressed in the settlement asset of the instrument (USDC)"
+        ),
     ]
-    funding_rate: Annotated[str, Field(description="Current funding rate as a decimal string")]
+    funding_rate: Annotated[
+        str,
+        Field(
+            description="Clamped [mark price]/[spot price] - 1. Full details - https://docs.paradex.trade/documentation/risk-system/funding-mechanism#funding-rate"
+        ),
+    ]

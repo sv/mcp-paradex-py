@@ -1,0 +1,31 @@
+{
+    "name": "mcp-paradex",
+    "main": "src/mcp_paradex/server/worker.py",
+    "compatibility_flags": [
+        "python_workers"
+    ],
+    "compatibility_date": "2025-04-10",
+    "vars": {
+        "API_HOST": "example.com"
+    },
+    "rules": [
+        {
+            "globs": [
+                "vendor/**/"
+            ],
+            "type": "Data",
+            "fallthrough": true
+        }
+    ],
+    "durable_objects": {
+        "bindings": [
+            {
+                "name": "ns",
+                "class_name": "FastMCPServer"
+            }
+        ]
+    },
+    "observability": {
+        "enabled": true
+    }
+}

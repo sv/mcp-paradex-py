@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import Annotated, Any
 
 from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from paradex_py.common.order import Order, OrderSide, OrderType
 from pydantic import Field, TypeAdapter
 
@@ -16,7 +17,7 @@ from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 order_state_adapter = TypeAdapter(list[OrderState])
 
 
-@server.tool(name="paradex_open_orders")
+@server.tool(name="paradex_open_orders", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_open_orders(
     market_id: Annotated[str, Field(default="ALL", description="Filter by market.")],
     ctx: Context = None,

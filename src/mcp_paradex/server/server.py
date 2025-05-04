@@ -5,9 +5,12 @@ MCP server implementation for Paradex integration.
 import argparse
 import logging
 import sys
+from http.client import HTTPException
 from typing import Any
 
+from exceptions import HTTPException, http_exception
 from mcp.server.fastmcp.server import FastMCP
+from workers import DurableObject
 
 from mcp_paradex.utils.config import config
 
@@ -83,3 +86,32 @@ def run_cli() -> None:
         sys.exit(1)
 
     logger.info("Server stopped")
+
+
+class FastMCPServer(DurableObject):
+    def __init__(self, ctx, env, mcp: FastMCP):
+        self.ctx = ctx
+        self.env = env
+        self.mcp = mcp
+        self.app = mcp.sse_app()
+        from starlette.middleware import Middleware
+        from starlette.middleware.cors import CORSMiddleware
+
+        self.app.add_exception_handler(HTTPException, http_exception)
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+    async def call(self, request):
+        import asgi
+
+        return await asgi.fetch(self.app, request, self.env, self.ctx)
+
+
+async def on_fetch(request, env):
+    id = env.ns.idFromName("example")
+    obj = env.ns.get(id)
+    return await obj.call(request)

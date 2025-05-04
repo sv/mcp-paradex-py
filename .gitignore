@@ -29,3 +29,4 @@ htmlcov/
 prompts/paradex-openapi.json
 llms-full.txt
 mcp-reports
+node_modules

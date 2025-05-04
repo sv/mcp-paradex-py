@@ -3,9 +3,9 @@ name = "mcp-paradex"
 version = "0.1.0"
 description = "MCP server for Paradex trading platform integration"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
-    "mcp[cli]>=1.6.0",
+    "mcp[cli]>=1.7.1",
     "paradex-py>=0.4.3",
     "pydantic>=2.10.6",
     "uvicorn>=0.34.0",

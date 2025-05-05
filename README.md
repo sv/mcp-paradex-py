@@ -4,6 +4,10 @@
 
 Model Context Protocol (MCP) server implementation for the Paradex trading platform.
 
+<a href="https://glama.ai/mcp/servers/cq4bz5ljqj">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/cq4bz5ljqj/badge" alt="Paradex Server MCP server" />
+</a>
+
 ## Overview
 
 This project provides a bridge between AI assistants (like Claude) and the Paradex perpetual futures trading platform. Using the MCP standard, AI assistants can:

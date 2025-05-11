@@ -26,7 +26,7 @@ FROM python:3.12-slim-bookworm
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
- 
+
 COPY --from=uv /root/.local /root/.local
 COPY --from=uv --chown=app:app /app/.venv /app/.venv
 COPY --from=uv /app /app

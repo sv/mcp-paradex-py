@@ -6,7 +6,9 @@ Model Context Protocol (MCP) server implementation for the Paradex trading platf
 
 ## Overview
 
-This project provides a bridge between AI assistants (like Claude) and the Paradex perpetual futures trading platform. Using the MCP standard, AI assistants can:
+This project provides a bridge between AI assistants (like Claude) and the
+Paradex perpetual futures trading platform. Using the MCP standard,
+AI assistants can:
 
 - Retrieve market data from Paradex
 - Manage trading accounts and vaults
@@ -44,9 +46,10 @@ npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
    ```
 
 3. Install dependencies:
-   ```bash
+
+```bash
    uv pip install -e .
-   ```
+```
 
 ### Configuration
 
@@ -62,7 +65,7 @@ Then edit the `.env` file with your Paradex credentials.
 
 ### Docker (recommended)
 
-```
+```bash
 docker build . -t sv/mcp-paradex-py
 ```
 
@@ -70,19 +73,20 @@ docker build . -t sv/mcp-paradex-py
 
 Public only
 
-```
+```bash
 docker run --rm -i sv/mcp-paradex-py
 ```
 
 Allow trading
 
-```
+```bash
 docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=0xprivatekey -i sv/mcp-paradex-py
 ```
 
 ## Smithery.ai Integration
 
-This MCP server is compatible with [Smithery.ai](https://smithery.ai/), a platform for discovering and deploying MCP servers.
+This MCP server is compatible with [Smithery.ai](https://smithery.ai/),
+a platform for discovering and deploying MCP servers.
 
 ### Claude Desktop Configuration
 
@@ -112,7 +116,9 @@ To use this server with Claude Desktop via Smithery.ai:
 
 ### Smithery.ai Registry
 
-The server includes a `smithery.yaml` file with metadata for the Smithery.ai registry. If you want to publish this server to Smithery.ai, you can use the Smithery CLI:
+The server includes a `smithery.yaml` file with metadata for the Smithery.ai
+registry. If you want to publish this server to Smithery.ai, you can use the
+Smithery CLI:
 
 ```bash
 # Install Smithery CLI
@@ -133,14 +139,16 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### System Resources
 
-- `paradex://system/config` - Get Paradex system configuration and basic information about the exchange
+- `paradex://system/config` - Get Paradex system configuration and
+  basic information about the exchange
 - `paradex://system/time` - Get current system time in milliseconds since epoch
 - `paradex://system/state` - Get the current Paradex system operational state
 
 #### Market Resources
 
 - `paradex://markets` - Get a list of available markets from Paradex
-- `paradex://market/summary/{market_id}` - Get detailed market information for a specific trading pair
+- `paradex://market/summary/{market_id}` - Get detailed market information
+  for a specific trading pair
 
 #### Vault Resources
 
@@ -148,9 +156,11 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 - `paradex://vaults/config` - Get global configuration for vaults
 - `paradex://vaults/balance/{vault_id}` - Get the balance of a specific vault
 - `paradex://vaults/summary/{vault_id}` - Get comprehensive summary of a vault
-- `paradex://vaults/transfers/{vault_id}` - Get deposit and withdrawal history for a vault
+- `paradex://vaults/transfers/{vault_id}` - Get deposit and withdrawal history
+  for a vault
 - `paradex://vaults/positions/{vault_id}` - Get current trading positions for a vault
-- `paradex://vaults/account-summary/{vault_id}` - Get trading account information for a vault
+- `paradex://vaults/account-summary/{vault_id}` - Get trading account information
+  for a vault
 
 ### Tools
 
@@ -161,12 +171,16 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### Market Tools
 
-- `paradex_markets` - Get detailed information about markets, including base/quote assets, tick size, and other trading parameters
-- `paradex_market_summaries` - Get summaries with price, volume, 24h change, and other key market metrics
+- `paradex_markets` - Get detailed information about markets, including
+  base/quote assets, tick size, and other trading parameters
+- `paradex_market_summaries` - Get summaries with price, volume, 24h change,
+  and other key market metrics
 - `paradex_funding_data` - Get historical funding rate data for perpetual markets
-- `paradex_orderbook` - Get the current orderbook for a market with customizable depth
+- `paradex_orderbook` - Get the current orderbook for a market
+  with customizable depth
 - `paradex_klines` - Get historical candlestick (OHLCV) data for a market
-- `paradex_trades` - Get recent trades for a market with price, size, and timestamp information
+- `paradex_trades` - Get recent trades for a market with price, size, and
+  timestamp information
 - `paradex_bbo` - Get best bid and offer (tightest spread) for a market
 
 #### Account Tools
@@ -187,36 +201,59 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### Vault Tools
 
-- `paradex_vaults` - Get detailed information about specific vaults or all vaults with filtering options
-- `paradex_vaults_config` - Get global configuration for vaults including fees, limits, and other settings
-- `paradex_vault_balance` - Get the current balance of a vault with available/locked funds information
-- `paradex_vault_summary` - Get comprehensive summary of vault performance, balance, and activity
+- `paradex_vaults` - Get detailed information about specific vaults or
+  all vaults with filtering options
+- `paradex_vaults_config` - Get global configuration for vaults including
+  fees, limits, and other settings
+- `paradex_vault_balance` - Get the current balance of a vault with
+  available/locked funds information
+- `paradex_vault_summary` - Get comprehensive summary of vault performance,
+  balance, and activity
 - `paradex_vault_transfers` - Get deposit and withdrawal history for a vault
-- `paradex_vault_positions` - Get current trading positions for a vault with market, size, entry price details
-- `paradex_vault_account_summary` - Get trading account information for a vault including margin and risk metrics
+- `paradex_vault_positions` - Get current trading positions for a vault
+  with market, size, entry price details
+- `paradex_vault_account_summary` - Get trading account information
+  for a vault including margin and risk metrics
 
 ## Trading Analysis Prompts
 
-This MCP server provides structured prompts that AI assistants can use to perform complex trading analysis and generate trading strategies.
+This MCP server provides structured prompts that AI assistants can use
+to perform complex trading analysis and generate trading strategies.
 
 ### Market Analysis
 
-- `market_overview` - Get comprehensive overview of the crypto market, including top gainers/losers, high-volume markets, funding rate anomalies, and market microstructure analysis
-- `market_analysis` - Detailed technical and microstructure analysis of a specific market, with support/resistance levels, chart patterns, orderbook analysis, and position recommendations
+- `market_overview` - Get comprehensive overview of the crypto market,
+  including top gainers/losers, high-volume markets, funding rate anomalies, and
+  market microstructure analysis
+- `market_analysis` - Detailed technical and microstructure analysis
+  of a specific market, with support/resistance levels, chart patterns,
+  orderbook analysis, and position recommendations
 
 ### Position and Portfolio Management
 
-- `position_management` - Comprehensive analysis of existing positions, including portfolio heat, correlation, risk metrics, and specific recommendations for profit-taking and loss management
-- `create_optimal_order` - Design optimal order parameters for a market based on volatility, liquidity, risk tolerance, and ideal entry strategy
-- `hedging_strategy` - Develop effective hedging strategies for specific positions using correlation analysis, hedge ratio calculation, and implementation planning
-- `portfolio_risk_assessment` - Thorough risk analysis of trading portfolio, including exposure analysis, correlation assessment, VaR calculations, and risk reduction recommendations
-- `liquidation_protection` - Identify and mitigate liquidation risks for open positions with severity classification and protection strategies
+- `position_management` - Comprehensive analysis of existing positions,
+  including portfolio heat, correlation, risk metrics, and specific
+  recommendations for profit-taking and loss management
+- `create_optimal_order` - Design optimal order parameters for a market
+  based on volatility, liquidity, risk tolerance, and ideal entry strategy
+- `hedging_strategy` - Develop effective hedging strategies for specific
+  positions using correlation analysis, hedge ratio calculation,
+  and implementation planning
+- `portfolio_risk_assessment` - Thorough risk analysis of trading portfolio,
+  including exposure analysis, correlation assessment, VaR calculations,
+  and risk reduction recommendations
+- `liquidation_protection` - Identify and mitigate liquidation risks for
+  open positions with severity classification and protection strategies
 
 ### Investment Strategies
 
-- `vault_analysis` - Comprehensive analysis of vaults for investment decision-making, with performance metrics, risk profiles, and suitability assessment
-- `funding_rate_opportunity` - Identify and evaluate funding rate arbitrage opportunities across markets, including yield calculations and implementation strategies
-- `trading_consultation` - Interactive prompt sequence for personalized trading advice and consultation
+- `vault_analysis` - Comprehensive analysis of vaults for investment
+  decision-making, with performance metrics, risk profiles, and suitability assessment
+- `funding_rate_opportunity` - Identify and evaluate funding rate
+  arbitrage opportunities across markets, including yield calculations
+  and implementation strategies
+- `trading_consultation` - Interactive prompt sequence for personalized
+  trading advice and consultation
 
 ## Documentation MCP
 
@@ -239,7 +276,8 @@ We have seen significantly better results with giving client access to Paradex d
 
 ## Contributing
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information on how to contribute to this project, development setup, and our coding standards.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for information on how to
+contribute to this project, development setup, and our coding standards.
 
 ## License
 

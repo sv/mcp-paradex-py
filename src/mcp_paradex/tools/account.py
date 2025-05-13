@@ -15,8 +15,22 @@ from mcp_paradex.utils.paradex_client import api_call, get_authenticated_paradex
 @server.tool(name="paradex_account_summary")
 async def get_account_summary(ctx: Context) -> AccountSummary:
     """
-    Get account summary.
+    Get a snapshot of your account's current financial status and trading capacity.
 
+    Use this tool when you need to:
+    - Check your current available and total balance
+    - Understand your margin utilization and remaining trading capacity
+    - Verify your account health and distance from liquidation
+    - Get an overview of realized and unrealized P&L
+
+    This provides the essential financial information needed to make informed
+    trading decisions and manage risk appropriately.
+
+    Example use cases:
+    - Checking available balance before placing new orders
+    - Monitoring account health during volatile market conditions
+    - Assessing realized and unrealized P&L for performance tracking
+    - Verifying margin requirements and utilization
     """
     client = await get_authenticated_paradex_client()
     response = await api_call(client, "account")
@@ -29,7 +43,22 @@ position_adapter = TypeAdapter(list[Position])
 @server.tool(name="paradex_account_positions")
 async def get_account_positions(ctx: Context) -> dict:
     """
-    Get account positions.
+    Analyze your open positions to monitor exposure, profitability, and risk.
+
+    Use this tool when you need to:
+    - Check the status and P&L of all your open positions
+    - Monitor your liquidation prices and margin requirements
+    - Assess your exposure across different markets
+    - Make decisions about position management (scaling, hedging, closing)
+
+    Understanding your current positions is fundamental to proper risk management
+    and is the starting point for many trading decisions.
+
+    Example use cases:
+    - Checking the unrealized P&L of your positions
+    - Monitoring liquidation prices during market volatility
+    - Assessing total exposure across related assets
+    - Verifying entry prices and position sizes
     """
     client = await get_authenticated_paradex_client()
     response = client.fetch_positions()
@@ -57,7 +86,24 @@ async def get_account_fills(
     ctx: Context = None,
 ) -> dict:
     """
-    Get account fills.
+    Analyze your executed trades to evaluate performance and execution quality.
+
+    Use this tool when you need to:
+    - Review your trading history across specific markets
+    - Calculate your average entry price for multi-fill positions
+    - Analyze execution quality compared to intended prices
+    - Track realized PnL from completed trades
+    - Verify order execution details for reconciliation
+
+    Detailed fill information is essential for performance analysis and
+    understanding how your orders were actually executed.
+
+    Example use cases:
+    - Calculating volume-weighted average price (VWAP) of your entries
+    - Analyzing execution slippage from your intended prices
+    - Reviewing trade history for tax or accounting purposes
+    - Tracking commission costs across different markets
+    - Identifying which of your strategies produced the best execution
     """
     client = await get_authenticated_paradex_client()
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}
@@ -82,10 +128,24 @@ async def get_account_funding_payments(
     ctx: Context = None,
 ) -> dict:
     """
-    Get account funding payments.
+    Track your funding payment history to understand its impact on P&L.
 
-    Returns:
-        Dict[str, Any]: Account funding payments.
+    Use this tool when you need to:
+    - Calculate total funding costs or gains for a position
+    - Analyze how funding has affected your overall performance
+    - Plan position timing around funding payment schedules
+    - Compare funding costs across different markets
+    - Account for funding in your trading strategy profitability
+
+    Funding payments can significantly impact perpetual futures trading P&L,
+    especially for longer-term positions or in markets with volatile funding rates.
+
+    Example use cases:
+    - Calculating the total funding component of your P&L
+    - Comparing funding costs against trading profits
+    - Planning position entries/exits around funding payment times
+    - Identifying markets where funding has been consistently favorable
+    - Reconciling funding payments for accounting purposes
     """
     client = await get_authenticated_paradex_client()
     params = {"market": market_id, "start_at": start_unix_ms, "end_at": end_unix_ms}

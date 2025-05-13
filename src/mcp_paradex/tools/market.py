@@ -28,7 +28,22 @@ async def get_filters_model(
     tool_name: Annotated[str, Field(description="The name of the tool to get the filters for.")],
 ) -> dict:
     """
-    Get the filters for a tool.
+    Get detailed schema information to build precise data filters.
+
+    Use this tool when you need to:
+    - Understand exactly what fields are available for filtering
+    - Learn the data types and formats for specific fields
+    - Build complex JMESPath queries with correct syntax
+    - Create sophisticated filtering and sorting expressions
+
+    Knowing the exact schema helps you construct precise filters that
+    return exactly the data you need, avoiding trial and error.
+
+    Example use cases:
+    - Learning what fields exist in market data responses
+    - Finding the correct property names for filtering
+    - Understanding data types for numerical comparisons
+    - Building complex multi-criteria filters for large datasets
     """
     tool_descriptions = {
         "paradex_markets": models.MarketDetails.model_json_schema(),
@@ -76,12 +91,23 @@ async def get_markets(
     ctx: Context = None,
 ) -> dict:
     """
-    Get detailed information about specific markets.
+    Find markets that match your trading criteria or get detailed market specifications.
+
+    Use this tool when you need to:
+    - Understand exact tick sizes and minimum order sizes before placing trades
+    - Find all markets for a specific asset (e.g., all BTC-based markets)
+    - Compare contract specifications across different markets
+    - Identify markets with specific characteristics for your trading strategy
 
     Retrieves comprehensive details about specified markets, including
     base and quote assets, tick size, minimum order size, and other
     trading parameters. If "ALL" is specified or no market IDs are provided,
     returns details for all available markets.
+
+    Example use cases:
+    - Finding the minimum order size for a new trade
+    - Identifying markets with the smallest tick size for precise entries
+    - Checking which assets are available for trading
 
     `asset_kind` is the type of asset in the market. It can be `PERP` or `PERP_OPTION`.
 
@@ -162,11 +188,23 @@ async def get_market_summaries(
     ctx: Context = None,
 ) -> dict:
     """
-    Get a summary of market statistics and current state for specific markets.
+    Identify the most active or volatile markets and get current market conditions.
+
+    Use this tool when you need to:
+    - Find the most active markets by volume for liquidity analysis
+    - Discover markets with significant price movements for momentum strategies
+    - Compare current prices across multiple assets
+    - Identify markets with unusual behavior for potential opportunities
 
     Retrieves current market summary information including price, volume,
     24h change, and other key market metrics. If "ALL" is specified or no market IDs
     are provided, returns summaries for all available markets.
+
+    Example use cases:
+    - Finding high-volatility markets for short-term trading
+    - Identifying top gainers and losers for the day
+    - Comparing volume across different markets to find liquidity
+    - Getting the current price and 24-hour range for price analysis
 
     You can use JMESPath expressions (https://jmespath.org/specification.html) to filter, sort, or limit the results.
     Use the `paradex_filters_model` tool to get the filters for a tool.
@@ -225,11 +263,22 @@ async def get_funding_data(
     ctx: Context = None,
 ) -> dict[str, Any]:
     """
-    Get historical funding rate data for a perpetual market.
+    Analyze funding rates for potential funding arbitrage or to understand holding costs.
 
-    Retrieves funding rate history for a specified time period, which is
-    essential for understanding the cost of holding perpetual positions.
+    Use this tool when you need to:
+    - Calculate expected funding payments for a position
+    - Find markets with extreme funding rates for potential arbitrage
+    - Understand historical funding patterns for a market
+    - Evaluate the cost of holding a position over time
 
+    This data is critical for perpetual futures traders to assess the carrying cost
+    of positions and identify potential funding arbitrage opportunities.
+
+    Example use cases:
+    - Finding markets with negative funding for "paid to hold" opportunities
+    - Calculating the funding component of a trade's P&L
+    - Comparing funding rates across different assets for relative value trades
+    - Analyzing funding rate volatility to predict potential rate changes
     """
     try:
         # Get funding data from Paradex
@@ -272,11 +321,22 @@ async def get_orderbook(
     ctx: Context = None,
 ) -> dict[str, Any]:
     """
-    Get the current orderbook for a market.
+    Analyze market depth and liquidity to optimize order entry and execution.
 
-    Retrieves the current state of the orderbook for a specified market,
-    showing bid and ask orders up to the requested depth.
+    Use this tool when you need to:
+    - Assess true liquidity before placing large orders
+    - Identify potential support/resistance levels from order clusters
+    - Determine optimal limit order prices for higher fill probability
+    - Detect order imbalances that might signal price direction
 
+    Understanding the orderbook is essential for effective trade execution,
+    especially for larger orders or in less liquid markets.
+
+    Example use cases:
+    - Finding the optimal limit price to ensure your order gets filled
+    - Estimating potential slippage for market orders of different sizes
+    - Identifying large resting orders that might act as support/resistance
+    - Detecting order book imbalances that could predict short-term price moves
     """
     try:
         # Get orderbook from Paradex
@@ -316,11 +376,24 @@ async def get_klines(
     ctx: Context = None,
 ) -> list[OHLCV]:
     """
-    Get candlestick (kline) data for a market.
+    Analyze historical price patterns for technical analysis and trading decisions.
 
-    Retrieves historical price candlestick data for a specified market and time period.
-    Each candlestick contains open, high, low, close prices and volume information.
+    Use this tool when you need to:
+    - Perform technical analysis on historical price data
+    - Identify support and resistance levels from price history
+    - Calculate indicators like moving averages, RSI, or MACD
+    - Backtest trading strategies on historical data
+    - Visualize price action over specific timeframes
 
+    Candlestick data is fundamental for most technical analysis and trading decisions,
+    providing structured price and volume information over time.
+
+    Example use cases:
+    - Identifying chart patterns for potential entries or exits
+    - Calculating technical indicators for trading signals
+    - Determining volatility by analyzing price ranges
+    - Finding significant price levels from historical support/resistance
+    - Measuring volume patterns to confirm price movements
     """
     try:
         # Get klines from Paradex
@@ -366,10 +439,24 @@ async def get_trades(
     ctx: Context = None,
 ) -> dict:
     """
-    Get recent trades for a market.
+    Analyze actual market transactions to understand market sentiment and liquidity.
 
-    Retrieves historical trade data for a specified market and time period.
-    Each trade includes price, size, side (buy/sell), and timestamp information.
+    Use this tool when you need to:
+    - Detect large trades that might signal institutional activity
+    - Calculate average trade size during specific periods
+    - Identify buy/sell pressure imbalances
+    - Monitor execution prices vs. order book prices
+    - Understand market momentum through trade flow
+
+    Trade data provides insights into actual market activity versus just orders,
+    helping you understand how other participants are behaving.
+
+    Example use cases:
+    - Detecting large "whale" transactions that might influence price
+    - Analyzing trade sizes to gauge market participation
+    - Identifying periods of aggressive buying or selling
+    - Understanding trade frequency as an indicator of market interest
+    - Comparing executed prices to orderbook mid-price for market impact analysis
     """
     try:
         # Get trades from Paradex
@@ -397,11 +484,24 @@ async def get_bbo(
     ctx: Context = None,
 ) -> dict:
     """
-    Get the Best Bid and Offer (BBO) for a market.
+    Get the current best available prices for immediate execution decisions.
 
-    Retrieves the current best bid and best offer (ask) prices and sizes
-    for a specified market. This represents the tightest spread currently
-    available.
+    Use this tool when you need to:
+    - Make quick trading decisions without full orderbook depth
+    - Calculate current spread costs before placing orders
+    - Monitor real-time price changes efficiently
+    - Get a snapshot of current market conditions
+    - Determine fair mid-price for calculations
+
+    The BBO provides the most essential price information with minimal data,
+    perfect for quick decisions or when full orderbook depth isn't needed.
+
+    Example use cases:
+    - Calculating current trading spreads before placing orders
+    - Monitoring real-time price movements efficiently
+    - Determining execution prices for immediate market orders
+    - Calculating mid-price for order placement strategies
+    - Setting appropriate limit order prices to improve fill chances
     """
     try:
         # Get BBO from Paradex

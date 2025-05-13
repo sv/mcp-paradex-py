@@ -22,15 +22,22 @@ logger = logging.getLogger(__name__)
 @server.tool(name="paradex_system_config")
 async def get_system_config(ctx: Context) -> SystemConfig:
     """
-    Get global Paradex system configuration.
+    Understand the exchange's global parameters that affect all trading activity.
 
-    Retrieves the current system-wide configuration parameters from Paradex,
-    including trading limits, fee schedules, and other global settings.
-    This information is useful for understanding the current operating
-    parameters of the exchange.
+    Use this tool when you need to:
+    - Check fee schedules before placing trades
+    - Verify trading limits and restrictions
+    - Understand exchange-wide parameters that affect your trading
+    - Keep up with changes to the exchange's configuration
 
-    Returns:
-        SystemConfig: Global Paradex system configuration
+    This information provides important context for making trading decisions and
+    understanding how the exchange operates.
+
+    Example use cases:
+    - Checking current fee tiers for different markets
+    - Verifying maximum leverage available for specific markets
+    - Understanding global trading limits or restrictions
+    - Checking if any exchange-wide changes might affect your trading strategy
     """
     try:
         client = await get_paradex_client()
@@ -45,12 +52,22 @@ async def get_system_config(ctx: Context) -> SystemConfig:
 @server.tool(name="paradex_system_state")
 async def get_system_state(ctx: Context) -> SystemState:
     """
-    Get the current Paradex system operational state.
+    Verify the exchange is fully operational before executing trades.
 
-    Retrieves the current operational state of the Paradex exchange,
-    including information about system health, maintenance status,
-    and any active alerts or notices. This is useful for checking
-    if the exchange is fully operational before executing trades.
+    Use this tool when you need to:
+    - Check if Paradex is functioning normally before placing important orders
+    - Verify system status if you encounter unexpected behavior
+    - Confirm that maintenance periods are not in effect
+    - Check exchange clock synchronization with your own systems
+
+    This is especially important before executing critical trades or when
+    experiencing unexpected behavior from other API calls.
+
+    Example use cases:
+    - Verifying the exchange is operational before executing a trading strategy
+    - Checking if maintenance mode is active when experiencing delays
+    - Confirming exchange status during periods of market volatility
+    - Diagnosing API issues by checking system health
     """
     try:
         client = await get_paradex_client()

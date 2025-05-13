@@ -240,29 +240,24 @@ async def get_vault_transfers(
     ],
 ) -> dict[str, Any]:
     """
-    Get a list of deposit and withdrawal transfers for a specific vault.
+    Track deposit and withdrawal history for auditing and reconciliation.
 
-    Retrieves the history of all transfers (deposits and withdrawals) for a vault,
-    including timestamps, amounts, transaction hashes, and status information.
-    This is useful for auditing vault activity and tracking fund movements.
+    Use this tool when you need to:
+    - Verify deposits have completed and are available for trading
+    - Track withdrawal status and confirm transaction settlement
+    - Audit the complete fund flow history for a vault
+    - Reconcile on-chain transactions with platform records
+    - Understand historical capital allocation patterns
 
+    Complete transfer history is essential for proper accounting and provides
+    a clear audit trail of all capital movements.
 
-    Returns:
-        Dict[str, Any]: List of transfers for the vault, each containing:
-            - id (str): Transfer ID
-            - type (str): "DEPOSIT" or "WITHDRAWAL"
-            - amount (float): Transfer amount
-            - currency (str): Currency of the transfer
-            - timestamp (str): When the transfer occurred
-            - status (str): Status of the transfer (e.g., "COMPLETED", "PENDING")
-            - transaction_hash (str): Blockchain transaction hash
-
-            If an error occurs, returns:
-            - success (bool): False
-            - timestamp (str): ISO-formatted timestamp of the request
-            - environment (str): Current Paradex environment
-            - error (str): Error message
-            - transfers (None): Null value for transfers
+    Example use cases:
+    - Confirming that a recent deposit was credited to your account
+    - Tracking the status of pending withdrawals
+    - Creating transaction reports for accounting or tax purposes
+    - Verifying the total amount deposited over time
+    - Analyzing deposit/withdrawal patterns for strategy insights
     """
     try:
         client = await get_paradex_client()
@@ -289,11 +284,24 @@ async def get_vault_positions(
     ],
 ) -> list[Position]:
     """
-    Get a list of current trading positions for a specific vault.
+    Monitor active trading positions to track performance and manage risk.
 
-    Retrieves all open trading positions for a vault, including market,
-    size, entry price, liquidation price, unrealized PnL, and other
-    position-specific information.
+    Use this tool when you need to:
+    - Get a complete view of all open positions for a vault
+    - Monitor unrealized P&L across all positions
+    - Check liquidation prices and margin requirements
+    - Assess position sizing and leverage across markets
+    - Track entry prices and position duration
+
+    Position monitoring is fundamental to risk management and provides
+    the necessary information for trade management decisions.
+
+    Example use cases:
+    - Checking the current status of all open trades
+    - Monitoring unrealized profit/loss across positions
+    - Assessing liquidation risk during market volatility
+    - Comparing performance across different markets
+    - Planning adjustments to position sizes or leverage
     """
     try:
         client = await get_paradex_client()
@@ -315,12 +323,24 @@ async def get_vault_account_summary(
     ],
 ) -> list[VaultAccountSummary]:
     """
-    Get a summary of trading account information for a specific vault.
+    Get a comprehensive overview of a vault's trading account status.
 
-    Retrieves a comprehensive summary of the trading account associated with
-    a vault, including margin information, account health, risk metrics,
-    and trading statistics.
+    Use this tool when you need to:
+    - Check account health and available margin
+    - Monitor total exposure and leverage
+    - Understand risk metrics and account status
+    - Assess trading capacity before placing new orders
+    - Get a consolidated view of account performance
 
+    This provides essential information about account standing and
+    trading capacity to inform risk management decisions.
+
+    Example use cases:
+    - Checking available margin before placing new orders
+    - Monitoring account health during market volatility
+    - Assessing total exposure across all markets
+    - Understanding maintenance margin requirements
+    - Planning position adjustments based on account metrics
     """
     try:
         client = await get_paradex_client()

@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.8.1",
-    "paradex-py>=0.4.3",
+    "paradex-py>=0.4.5",
     "pydantic>=2.10.6",
     "uvicorn>=0.34.0",
     "python-dotenv>=1.0.1",

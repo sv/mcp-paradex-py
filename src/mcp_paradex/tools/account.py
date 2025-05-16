@@ -11,9 +11,11 @@ from mcp_paradex.models import AccountSummary, Fill, Position, Transaction
 from mcp_paradex.server.server import server
 from mcp_paradex.utils.paradex_client import api_call, get_authenticated_paradex_client
 
+account_summary_adapter = TypeAdapter(AccountSummary)
+
 
 @server.tool(name="paradex_account_summary")
-async def get_account_summary(ctx: Context) -> AccountSummary:
+async def get_account_summary(ctx: Context) -> dict:
     """
     Get a snapshot of your account's current financial status and trading capacity.
 
@@ -34,7 +36,12 @@ async def get_account_summary(ctx: Context) -> AccountSummary:
     """
     client = await get_authenticated_paradex_client()
     response = await api_call(client, "account")
-    return AccountSummary.model_validate(response)
+    result = {
+        "description": AccountSummary.__doc__.strip() if AccountSummary.__doc__ else None,
+        "fields": AccountSummary.model_json_schema(),
+        "results": account_summary_adapter.validate_python(response),
+    }
+    return result
 
 
 position_adapter = TypeAdapter(list[Position])

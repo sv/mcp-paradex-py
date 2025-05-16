@@ -20,8 +20,25 @@ order_state_adapter = TypeAdapter(list[OrderState])
 @server.tool(name="paradex_open_orders", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_open_orders(
     market_id: Annotated[str, Field(default="ALL", description="Filter by market.")],
+    limit: Annotated[
+        int,
+        Field(
+            default=10,
+            gt=0,
+            le=100,
+            description="Limit the number of results to the specified number.",
+        ),
+    ],
+    offset: Annotated[
+        int,
+        Field(
+            default=0,
+            ge=0,
+            description="Offset the results to the specified number.",
+        ),
+    ],
     ctx: Context = None,
-) -> list[OrderState]:
+) -> dict:
     """
     Monitor your active orders to track execution status and manage your trading strategy.
 
@@ -47,7 +64,17 @@ async def get_open_orders(
         ctx.error(f"Error fetching open orders: {response['error']}")
         raise Exception(response["error"])
     orders = order_state_adapter.validate_python(response["results"])
-    return orders
+    sorted_orders = sorted(orders, key=lambda x: x.created_at)
+    result_orders = sorted_orders[offset : offset + limit]
+    result = {
+        "description": OrderState.__doc__.strip() if OrderState.__doc__ else None,
+        "fields": OrderState.model_json_schema(),
+        "results": result_orders,
+        "total": len(sorted_orders),
+        "limit": limit,
+        "offset": offset,
+    }
+    return result
 
 
 @server.tool(name="paradex_create_order")
@@ -57,16 +84,14 @@ async def create_order(
     order_type: Annotated[OrderTypeEnum, Field(description="Order type.")],
     size: Annotated[float, Field(description="Order size.")],
     price: Annotated[float, Field(description="Order price (required for LIMIT orders).")],
-    trigger_price: Annotated[
-        float, Field(description="Trigger price (required for STOP_LIMIT orders).")
-    ],
+    trigger_price: Annotated[float, Field(description="Trigger price for stop limit orders.")],
     instruction: Annotated[
         InstructionEnum, Field(default="GTC", description="Instruction for order execution.")
     ],
     reduce_only: Annotated[bool, Field(default=False, description="Reduce-only flag.")],
     client_id: Annotated[str, Field(description="Client-specified order ID.")],
     ctx: Context = None,
-) -> OrderState:
+) -> dict:
     """
     Execute trades on Paradex with precise control over all order parameters.
 
@@ -84,6 +109,9 @@ async def create_order(
     - Placing stop-limit orders to manage risk on existing positions
     - Executing market orders for immediate entry or exit
     - Creating reduce-only orders to ensure you don't flip position direction
+
+    Succesful response indicates that orders were queued for execution.
+    Check order status using order id.
     """
     client = await get_authenticated_paradex_client()
     o = Order(
@@ -99,7 +127,12 @@ async def create_order(
     )
     response = client.submit_order(o)
     order: OrderState = OrderState(**response)
-    return order
+    result = {
+        "description": OrderState.__doc__.strip() if OrderState.__doc__ else None,
+        "fields": OrderState.model_json_schema(),
+        "results": order,
+    }
+    return result
 
 
 @server.tool(name="paradex_cancel_orders")
@@ -158,7 +191,7 @@ async def get_order_status(
     order_id: Annotated[str, Field(description="Order identifier.")],
     client_id: Annotated[str, Field(description="Client-specified order ID.")],
     ctx: Context = None,
-) -> OrderState:
+) -> dict:
     """
     Check the detailed status of a specific order for execution monitoring.
 
@@ -187,7 +220,12 @@ async def get_order_status(
     else:
         raise Exception("Either order_id or client_id must be provided.")
     order: OrderState = OrderState.model_validate(response)
-    return order
+    result = {
+        "description": OrderState.__doc__.strip() if OrderState.__doc__ else None,
+        "fields": OrderState.model_json_schema(),
+        "results": order,
+    }
+    return result
 
 
 @server.tool(name="paradex_orders_history")
@@ -196,7 +234,7 @@ async def get_orders_history(
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
     end_unix_ms: Annotated[int, Field(description="End time in unix milliseconds.")],
     ctx: Context = None,
-) -> list[OrderState]:
+) -> dict:
     """
     Get historical orders.
 
@@ -212,5 +250,10 @@ async def get_orders_history(
         await ctx.error(response)
         raise Exception(response["error"])
     orders_raw: list[dict[str, Any]] = response["results"]
-    orders: list[OrderState] = [OrderState(**order) for order in orders_raw]
-    return orders
+    orders = order_state_adapter.validate_python(orders_raw)
+    result = {
+        "description": OrderState.__doc__.strip() if OrderState.__doc__ else None,
+        "fields": OrderState.model_json_schema(),
+        "results": orders,
+    }
+    return result

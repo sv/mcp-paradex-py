@@ -1,0 +1,19 @@
+{
+  "name": "mcp-paradex-ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.3",
+    "@paradex/sdk": "^0.6.0",
+    "zod": "^3.22.4"
+  }
+}

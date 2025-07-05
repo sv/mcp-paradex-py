@@ -25,87 +25,89 @@ AI assistants can:
 
 ## Installation
 
-### Installing via Smithery
+### Quick Start
 
-To install mcp-paradex-py for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@sv/mcp-paradex-py):
+#### Cursor IDE
+
+Click to automatically configure this MCP server in Cursor:
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=paradex&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJtY3AtcGFyYWRleCJdLCJlbnYiOnsiUEFSQURFWF9FTlZJUk9OTUVOVCI6InRlc3RuZXQiLCJQQVJBREVYX0FDQ09VTlRfUFJJVkFURV9LRVkiOiJ5b3VyX3ByaXZhdGVfa2V5In19Cg%3D%3D)
+
+#### Claude Code CLI
+
+```bash
+claude mcp add paradex uvx mcp-paradex
+```
+
+#### Smithery (Claude Desktop)
 
 ```bash
 npx -y @smithery/cli install @sv/mcp-paradex-py --client claude
 ```
 
-### Using uv (faster alternative)
+### Standard Installation
 
-1. Clone this repository:
+#### PyPI
+
+```bash
+pip install mcp-paradex
+```
+
+#### uvx (Recommended)
+
+```bash
+uvx mcp-paradex
+```
+
+### Development Setup
+
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/sv/mcp-paradex-py.git
    cd mcp-paradex-py
    ```
 
-2. Create a virtual environment:
+2. Install development dependencies:
 
    ```bash
-   uv venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv sync --dev --all-extras
    ```
 
-3. Install dependencies:
+3. Run locally:
 
-```bash
-   uv pip install -e .
-```
+   ```bash
+   uv run mcp-paradex
+   ```
 
-### Configuration
+## Configuration
 
-Set up your configuration:
+### Environment Variables
+
+Set these environment variables for authentication:
+
+- `PARADEX_ENVIRONMENT`: Set to `testnet` or `mainnet`
+- `PARADEX_ACCOUNT_PRIVATE_KEY`: Your Paradex account private key
+
+### Using .env File
 
 ```bash
 cp .env.template .env
+# Edit .env with your credentials
 ```
 
-Then edit the `.env` file with your Paradex credentials.
+### Client Configuration
 
-## Running the Server
+#### Claude Desktop
 
-### Docker (recommended)
-
-```bash
-docker build . -t sv/mcp-paradex-py
-```
-
-### In Cursor add MCP as command
-
-Public only
-
-```bash
-docker run --rm -i sv/mcp-paradex-py
-```
-
-Allow trading
-
-```bash
-docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=0xprivatekey -i sv/mcp-paradex-py
-```
-
-## Smithery.ai Integration
-
-This MCP server is compatible with [Smithery.ai](https://smithery.ai/),
-a platform for discovering and deploying MCP servers.
-
-### Claude Desktop Configuration
-
-To use this server with Claude Desktop via Smithery.ai:
-
-1. Open Claude Desktop and enable Developer Mode from the menu
-2. Go to Settings > Developer and click "Edit Config"
-3. Add the following configuration to your `claude_desktop_config.json`:
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "paradex": {
       "command": "uvx",
-      "args": ["--with-editable", ".", "mcp-paradex"],
+      "args": ["mcp-paradex"],
       "env": {
         "PARADEX_ENVIRONMENT": "testnet",
         "PARADEX_ACCOUNT_PRIVATE_KEY": "your_private_key"
@@ -115,27 +117,18 @@ To use this server with Claude Desktop via Smithery.ai:
 }
 ```
 
-4. Replace `your_ethereum_private_key` with your actual Paradex private key
-5. Save the file and restart Claude Desktop
-
-### Smithery.ai Registry
-
-The server includes a `smithery.yaml` file with metadata for the Smithery.ai
-registry. If you want to publish this server to Smithery.ai, you can use the
-Smithery CLI:
+#### Docker
 
 ```bash
-# Install Smithery CLI
-npm install -g @smithery/cli
+# Build image
+docker build . -t sv/mcp-paradex-py
 
-# Login to Smithery
-smithery login
+# Run (public only)
+docker run --rm -i sv/mcp-paradex-py
 
-# Publish the server
-smithery publish
+# Run with trading capabilities
+docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=your_key -i sv/mcp-paradex-py
 ```
-
-For more information about publishing to Smithery.ai, see the [Smithery documentation](https://smithery.ai/docs).
 
 ## Available Resources and Tools
 
@@ -143,125 +136,92 @@ For more information about publishing to Smithery.ai, see the [Smithery document
 
 #### System Resources
 
-- `paradex://system/config` - Get Paradex system configuration and
-  basic information about the exchange
-- `paradex://system/time` - Get current system time in milliseconds since epoch
-- `paradex://system/state` - Get the current Paradex system operational state
+- `paradex://system/config` - Get Paradex system configuration
+- `paradex://system/time` - Get current system time
+- `paradex://system/state` - Get system operational state
 
 #### Market Resources
 
-- `paradex://markets` - Get a list of available markets from Paradex
-- `paradex://market/summary/{market_id}` - Get detailed market information
-  for a specific trading pair
+- `paradex://markets` - List of available markets
+- `paradex://market/summary/{market_id}` - Detailed market information
 
 #### Vault Resources
 
-- `paradex://vaults` - List all vaults available on Paradex
-- `paradex://vaults/config` - Get global configuration for vaults
-- `paradex://vaults/balance/{vault_id}` - Get the balance of a specific vault
-- `paradex://vaults/summary/{vault_id}` - Get comprehensive summary of a vault
-- `paradex://vaults/transfers/{vault_id}` - Get deposit and withdrawal history
-  for a vault
-- `paradex://vaults/positions/{vault_id}` - Get current trading positions for a vault
-- `paradex://vaults/account-summary/{vault_id}` - Get trading account information
-  for a vault
+- `paradex://vaults` - List all vaults
+- `paradex://vaults/config` - Global vault configuration
+- `paradex://vaults/balance/{vault_id}` - Vault balance
+- `paradex://vaults/summary/{vault_id}` - Comprehensive vault summary
+- `paradex://vaults/transfers/{vault_id}` - Deposit/withdrawal history
+- `paradex://vaults/positions/{vault_id}` - Current trading positions
+- `paradex://vaults/account-summary/{vault_id}` - Trading account information
 
 ### Tools
 
 #### System Tools
 
-- `paradex_system_config` - Get global Paradex system configuration
+- `paradex_system_config` - Get global system configuration
 - `paradex_system_state` - Get current system state
 
 #### Market Tools
 
-- `paradex_markets` - Get detailed information about markets, including
-  base/quote assets, tick size, and other trading parameters
-- `paradex_market_summaries` - Get summaries with price, volume, 24h change,
-  and other key market metrics
-- `paradex_funding_data` - Get historical funding rate data for perpetual markets
-- `paradex_orderbook` - Get the current orderbook for a market
-  with customizable depth
-- `paradex_klines` - Get historical candlestick (OHLCV) data for a market
-- `paradex_trades` - Get recent trades for a market with price, size, and
-  timestamp information
-- `paradex_bbo` - Get best bid and offer (tightest spread) for a market
+- `paradex_markets` - Get detailed market information
+- `paradex_market_summaries` - Get market summaries with metrics
+- `paradex_funding_data` - Get historical funding rate data
+- `paradex_orderbook` - Get current orderbook with customizable depth
+- `paradex_klines` - Get historical candlestick data
+- `paradex_trades` - Get recent trades
+- `paradex_bbo` - Get best bid and offer
 
 #### Account Tools
 
-- `paradex_account_summary` - Get account summary information
-- `paradex_account_positions` - Get current account positions
-- `paradex_account_fills` - Get account trade fills
-- `paradex_account_funding_payments` - Get account funding payments
-- `paradex_account_transactions` - Get account transaction history
+- `paradex_account_summary` - Get account summary
+- `paradex_account_positions` - Get current positions
+- `paradex_account_fills` - Get trade fills
+- `paradex_account_funding_payments` - Get funding payments
+- `paradex_account_transactions` - Get transaction history
 
 #### Order Tools
 
-- `paradex_open_orders` - Get all open orders for an account
-- `paradex_create_order` - Create a new order on Paradex
+- `paradex_open_orders` - Get all open orders
+- `paradex_create_order` - Create new order
 - `paradex_cancel_orders` - Cancel existing orders
-- `paradex_order_status` - Get the status of an order
-- `paradex_orders_history` - Get historical orders for an account
+- `paradex_order_status` - Get order status
+- `paradex_orders_history` - Get historical orders
 
 #### Vault Tools
 
-- `paradex_vaults` - Get detailed information about specific vaults or
-  all vaults with filtering options
-- `paradex_vaults_config` - Get global configuration for vaults including
-  fees, limits, and other settings
-- `paradex_vault_balance` - Get the current balance of a vault with
-  available/locked funds information
-- `paradex_vault_summary` - Get comprehensive summary of vault performance,
-  balance, and activity
-- `paradex_vault_transfers` - Get deposit and withdrawal history for a vault
-- `paradex_vault_positions` - Get current trading positions for a vault
-  with market, size, entry price details
-- `paradex_vault_account_summary` - Get trading account information
-  for a vault including margin and risk metrics
+- `paradex_vaults` - Get detailed vault information
+- `paradex_vaults_config` - Get global vault configuration
+- `paradex_vault_balance` - Get vault balance
+- `paradex_vault_summary` - Get comprehensive vault summary
+- `paradex_vault_transfers` - Get deposit/withdrawal history
+- `paradex_vault_positions` - Get current vault positions
+- `paradex_vault_account_summary` - Get vault trading account info
 
 ## Trading Analysis Prompts
 
-This MCP server provides structured prompts that AI assistants can use
-to perform complex trading analysis and generate trading strategies.
-
 ### Market Analysis
 
-- `market_overview` - Get comprehensive overview of the crypto market,
-  including top gainers/losers, high-volume markets, funding rate anomalies, and
-  market microstructure analysis
+- `market_overview` - Comprehensive crypto market overview
 - `market_analysis` - Detailed technical and microstructure analysis
-  of a specific market, with support/resistance levels, chart patterns,
-  orderbook analysis, and position recommendations
 
 ### Position and Portfolio Management
 
-- `position_management` - Comprehensive analysis of existing positions,
-  including portfolio heat, correlation, risk metrics, and specific
-  recommendations for profit-taking and loss management
-- `create_optimal_order` - Design optimal order parameters for a market
-  based on volatility, liquidity, risk tolerance, and ideal entry strategy
-- `hedging_strategy` - Develop effective hedging strategies for specific
-  positions using correlation analysis, hedge ratio calculation,
-  and implementation planning
-- `portfolio_risk_assessment` - Thorough risk analysis of trading portfolio,
-  including exposure analysis, correlation assessment, VaR calculations,
-  and risk reduction recommendations
-- `liquidation_protection` - Identify and mitigate liquidation risks for
-  open positions with severity classification and protection strategies
+- `position_management` - Comprehensive position analysis
+- `create_optimal_order` - Design optimal order parameters
+- `hedging_strategy` - Develop effective hedging strategies
+- `portfolio_risk_assessment` - Thorough portfolio risk analysis
+- `liquidation_protection` - Identify and mitigate liquidation risks
 
 ### Investment Strategies
 
-- `vault_analysis` - Comprehensive analysis of vaults for investment
-  decision-making, with performance metrics, risk profiles, and suitability assessment
-- `funding_rate_opportunity` - Identify and evaluate funding rate
-  arbitrage opportunities across markets, including yield calculations
-  and implementation strategies
-- `trading_consultation` - Interactive prompt sequence for personalized
-  trading advice and consultation
+- `vault_analysis` - Comprehensive vault analysis for investment decisions
+- `funding_rate_opportunity` - Identify funding rate arbitrage opportunities
+- `trading_consultation` - Interactive trading advice and consultation
 
 ## Documentation MCP
 
-We have seen significantly better results with giving client access to Paradex documentation
+Enhanced results with Paradex documentation access:
 
 ```json
 "paradex-docs-mcp": {

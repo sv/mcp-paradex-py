@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "mcp-paradex-py": {
-      "command": "docker",
-      "args": ["run", "--rm", "-i", "sv/mcp-paradex-py", "--transport", "stdio"]
-    }
-  }
-} 

@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sv-mcp-paradex-py-badge.png)](https://mseep.ai/app/sv-mcp-paradex-py)
+
 # MCP Paradex Server
 
 [![smithery badge](https://smithery.ai/badge/@sv/mcp-paradex-py)](https://smithery.ai/server/@sv/mcp-paradex-py)

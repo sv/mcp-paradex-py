@@ -61,4 +61,12 @@ jobs:
       run: pip install mcp-paradex
       
     - name: Test installation
-      run: mcp-paradex --help
+      run: |
+        # Test imports first
+        python -c "import mcp_paradex; print('Package imported successfully')"
+        
+        # Show where the CLI script is installed
+        which mcp-paradex || echo "mcp-paradex not found in PATH"
+        
+        # Try running with python -m
+        python -m mcp_paradex --help

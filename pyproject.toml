@@ -60,9 +60,6 @@ include = [
   "/pyproject.toml",
 ]
 
-[tool.hatch.build]
-sources = ["src"]
-
 
 [tool.black]
 line-length = 100

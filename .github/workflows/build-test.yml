@@ -23,7 +23,14 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: |
+          uv pip install build hatchling
+          uv pip install -e ".[dev]"
+
+      - name: Run linting
+        run: |
+          uv run black --check src tests
+          uv run ruff check src tests
 
       - name: Run tests
         run: uv run pytest --cov=mcp_paradex --cov-report=xml

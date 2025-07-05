@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field, TypeAdapter
 from mcp_paradex import models
 from mcp_paradex.models import BBO, FundingData, MarketDetails, MarketSummary, Trade
 from mcp_paradex.server.server import server
-from mcp_paradex.utils.config import config
 from mcp_paradex.utils.jmespath_utils import apply_jmespath_filter
 from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 

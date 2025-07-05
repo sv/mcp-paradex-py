@@ -4,6 +4,19 @@ version = "0.1.0"
 description = "MCP server for Paradex trading platform integration"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "mcp[cli]>=1.10.1",
     "paradex-py>=0.4.6",
@@ -35,6 +48,21 @@ paradex = "mcp_paradex.server.server:server"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_paradex"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/README.md",
+  "/LICENSE",
+  "/pyproject.toml",
+]
+
+[tool.hatch.build]
+sources = ["src"]
+
 
 [tool.black]
 line-length = 100
@@ -44,6 +72,8 @@ include = '\.pyi?$'
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "F",   # pyflakes
@@ -61,9 +91,18 @@ select = [
 ]
 ignore = [
     "E501",  # line too long (handled by black)
+    "E402",  # module level import not at top
+    "F403",  # star imports
+    "F401",  # unused imports (needed for registration)
+    "F841",  # local variable assigned but not used
+    "ARG001", # unused function argument (ctx is required by MCP)
+    "PTH100", # os.path usage (needed for compatibility)
+    "PTH120", # os.path.dirname usage
+    "RUF013", # implicit optional
+    "B904",  # raise without from
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["mcp_paradex"]
 known-third-party = ["mcp", "paradex_py", "pydantic"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
@@ -83,6 +122,11 @@ strict_optional = true
 module = "tests.*"
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = ["paradex_py.*", "mcp.*", "pydantic.*"]
+ignore_missing_imports = true
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

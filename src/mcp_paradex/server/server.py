@@ -32,7 +32,7 @@ def create_server() -> FastMCP:
         "name": config.SERVER_NAME,
         "description": "MCP server for Paradex trading platform",
         "vendor": "Model Context Protocol",
-        "version": "0.1.0",
+        "version": "0.1.1",
     }
 
     # Create server instance

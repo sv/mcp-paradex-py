@@ -1,0 +1,63 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.10"
+        enable-cache: true
+    
+    - name: Install dependencies
+      run: uv pip install -e ".[dev]"
+    
+    - name: Run quality checks
+      run: |
+        uv run black --check .
+        uv run ruff check .
+        uv run mypy src
+    
+    - name: Run tests
+      run: uv run pytest --cov=mcp_paradex
+    
+    - name: Build package
+      run: uv build
+    
+    - name: Check package
+      run: uv run twine check dist/*
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        # Using trusted publishing (no API token needed)
+        # Configure this at https://pypi.org/manage/account/publishing/
+        repository-url: https://upload.pypi.org/legacy/
+        print-hash: true
+        
+  test-install:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Wait for PyPI propagation
+      run: sleep 60
+      
+    - name: Install from PyPI
+      run: pip install mcp-paradex
+      
+    - name: Test installation
+      run: mcp-paradex --help

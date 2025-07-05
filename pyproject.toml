@@ -1,6 +1,6 @@
 [project]
 name = "mcp-paradex"
-version = "0.1.1"
+dynamic = ["version"]
 description = "MCP server for Paradex trading platform integration"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,6 +50,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_paradex"]
+
+[tool.hatch.version]
+path = "src/mcp_paradex/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

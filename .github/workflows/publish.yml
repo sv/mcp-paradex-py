@@ -54,16 +54,29 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     steps:
-    - name: Wait for PyPI propagation
-      run: sleep 60
+    - name: Extract version from tag
+      id: version
+      run: |
+        # Extract version from GITHUB_REF (e.g., refs/tags/v0.1.1 -> 0.1.1)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Installing version: ${VERSION}"
       
-    - name: Install from PyPI
-      run: pip install mcp-paradex
+    - name: Wait for PyPI propagation
+      run: sleep 120  # Increased to 2 minutes for better reliability
+      
+    - name: Install specific version from PyPI
+      run: |
+        # Install the exact version that was just published
+        pip install mcp-paradex==${{ steps.version.outputs.version }}
       
     - name: Test installation
       run: |
         # Test imports first
         python -c "import mcp_paradex; print('Package imported successfully')"
+        
+        # Verify correct version is installed
+        python -c "import mcp_paradex; print(f'Installed version: {mcp_paradex.__version__ if hasattr(mcp_paradex, \"__version__\") else \"unknown\"}')"
         
         # Show where the CLI script is installed
         which mcp-paradex || echo "mcp-paradex not found in PATH"

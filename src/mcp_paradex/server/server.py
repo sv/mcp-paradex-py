@@ -9,6 +9,7 @@ from typing import Any
 
 from mcp.server.fastmcp.server import FastMCP
 
+from mcp_paradex import __version__
 from mcp_paradex.utils.config import config
 
 # Configure logging
@@ -32,7 +33,7 @@ def create_server() -> FastMCP:
         "name": config.SERVER_NAME,
         "description": "MCP server for Paradex trading platform",
         "vendor": "Model Context Protocol",
-        "version": "0.1.1",
+        "version": __version__,
     }
 
     # Create server instance

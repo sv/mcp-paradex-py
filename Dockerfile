@@ -17,7 +17,7 @@ ADD . /app
 
 # Create virtual environment and install the project with its dependencies
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv venv && \
+    uv venv --python 3.12 && \
     . .venv/bin/activate && \
     uv pip install -e .
 
@@ -27,8 +27,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY --from=uv /root/.local /root/.local
-COPY --from=uv --chown=app:app /app/.venv /app/.venv
+COPY --from=uv /app/.venv /app/.venv
 COPY --from=uv /app /app
 
 # Place executables in the environment at the front of the path
@@ -37,7 +36,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8080
 
 # Default: stdio (for local use / Claude Desktop).
-# For Lambda / remote HTTP: override with
-#   CMD ["--transport", "streamable-http", "--port", "8080", "--stateless"]
 ENTRYPOINT ["mcp-paradex"]
 CMD []

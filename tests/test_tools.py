@@ -24,7 +24,6 @@ from mcp.server.fastmcp.exceptions import ToolError
 import mcp_paradex.utils.paradex_client as _client_module
 from mcp_paradex.server.server import server
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -258,7 +257,9 @@ async def test_markets_pagination(mock_client):
     records = [{**MARKET_RECORD, "symbol": f"MKT{i}-USD-PERP"} for i in range(5)]
     mock_client.fetch_markets.return_value = {"results": records}
 
-    result = await server.call_tool("paradex_markets", {"market_ids": ["ALL"], "limit": 2, "offset": 0})
+    result = await server.call_tool(
+        "paradex_markets", {"market_ids": ["ALL"], "limit": 2, "offset": 0}
+    )
     data = _json(result)
 
     assert data["total"] == 5
@@ -302,9 +303,7 @@ async def test_orderbook_passes_depth_param(mock_client):
         "bids": [["94999.0", "0.2"]],
     }
 
-    result = await server.call_tool(
-        "paradex_orderbook", {"market_id": "BTC-USD-PERP", "depth": 20}
-    )
+    result = await server.call_tool("paradex_orderbook", {"market_id": "BTC-USD-PERP", "depth": 20})
     data = _json(result)
 
     assert data["market"] == "BTC-USD-PERP"
@@ -490,9 +489,7 @@ async def test_cancel_order_by_client_id(auth_client):
 async def test_order_status_by_order_id(auth_client):
     auth_client.fetch_order.return_value = ORDER_RECORD
 
-    result = await server.call_tool(
-        "paradex_order_status", {"order_id": "ord-1", "client_id": ""}
-    )
+    result = await server.call_tool("paradex_order_status", {"order_id": "ord-1", "client_id": ""})
     data = _json(result)
 
     assert data["results"]["id"] == "ord-1"

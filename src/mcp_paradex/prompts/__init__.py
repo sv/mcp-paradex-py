@@ -2,30 +2,42 @@
 Trading prompts module initialization.
 """
 
-# Import all prompts to ensure they're registered
+# Always available prompts
 from mcp_paradex.prompts.trader_prompts import (
-    create_optimal_order,
     funding_rate_opportunity,
-    hedging_strategy,
-    liquidation_protection,
+    getting_started,
     market_analysis,
     market_overview,
-    portfolio_risk_assessment,
-    position_management,
     trading_consultation,
     vault_analysis,
 )
+from mcp_paradex.utils.config import config
+
+# Only register auth-required prompts when authenticated
+if config.is_configured():
+    from mcp_paradex.prompts.trader_prompts import (
+        create_optimal_order,
+        hedging_strategy,
+        liquidation_protection,
+        portfolio_risk_assessment,
+        position_management,
+    )
 
 # Export all prompts for convenient importing
 __all__ = [
-    "create_optimal_order",
     "funding_rate_opportunity",
-    "hedging_strategy",
-    "liquidation_protection",
+    "getting_started",
     "market_analysis",
     "market_overview",
-    "portfolio_risk_assessment",
-    "position_management",
     "trading_consultation",
     "vault_analysis",
 ]
+
+if config.is_configured():
+    __all__ += [
+        "create_optimal_order",
+        "hedging_strategy",
+        "liquidation_protection",
+        "portfolio_risk_assessment",
+        "position_management",
+    ]

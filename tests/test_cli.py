@@ -9,7 +9,6 @@ import pytest
 
 # Import the module explicitly so patch() can resolve the dotted path.
 import mcp_paradex.server.server as server_module
-
 from mcp_paradex.utils.config import config
 
 

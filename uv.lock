@@ -859,11 +859,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/db/f8775490669d28aca24871c67dd56b3e72105cb3bcae9a4ec65dd70859b3/eth_hash-0.7.1-py3-none-any.whl", hash = "sha256:0fb1add2adf99ef28883fd6228eb447ef519ea72933535ad1a0b28c6f65f868a", size = 8028 },
 ]
 
-[package.optional-dependencies]
-pycryptodome = [
-    { name = "pycryptodome", marker = "sys_platform != 'win32'" },
-]
-
 [[package]]
 name = "eth-keyfile"
 version = "0.8.1"
@@ -1374,7 +1369,7 @@ requires-dist = [
     { name = "jmespath", specifier = ">=1.0.1" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.26.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15.0" },
-    { name = "paradex-py", specifier = ">=0.5.4" },
+    { name = "paradex-py", specifier = ">=0.5.5" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "pydantic", specifier = ">=2.11.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
@@ -1578,7 +1573,7 @@ wheels = [
 
 [[package]]
 name = "paradex-py"
-version = "0.5.4"
+version = "0.5.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "eth-account", marker = "sys_platform != 'win32'" },
@@ -1587,14 +1582,14 @@ dependencies = [
     { name = "marshmallow-dataclass", marker = "sys_platform != 'win32'" },
     { name = "poseidon-py", marker = "sys_platform != 'win32'" },
     { name = "pydantic", marker = "sys_platform != 'win32'" },
+    { name = "pyjwt", marker = "sys_platform != 'win32'" },
     { name = "starknet-crypto-py", marker = "sys_platform != 'win32'" },
     { name = "starknet-py", marker = "sys_platform != 'win32'" },
-    { name = "web3", marker = "sys_platform != 'win32'" },
     { name = "websockets", marker = "sys_platform != 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/c2/c7ac63d647d996d3e39f8b5cf41875389229f454495df47b975e6546e20e/paradex_py-0.5.4.tar.gz", hash = "sha256:4960d684e7e01ea3d5ebc6f84b9ec2d5184d7c2a6ccac8de58d457da69727907", size = 246083 }
+sdist = { url = "https://files.pythonhosted.org/packages/b6/71/5ed7dce1d7f95a6c7a186c7918d559a9a58c861caf17a551b0d197872547/paradex_py-0.5.5.tar.gz", hash = "sha256:7dc494f829842e921060427acd782458a74ca6d4711dddc26d841c85de81b504", size = 263141 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/1b/6dac9b3480123cc325d3770d5489269ad99b149fd0db19aaabb892a6cd56/paradex_py-0.5.4-py3-none-any.whl", hash = "sha256:4a1026f00389edfa697f8d0ae78359fbf8f11e5c2b538d0a81758516982cf288", size = 68735 },
+    { url = "https://files.pythonhosted.org/packages/a2/66/fb31bc9f287a7ef90cc8ad842b87e3fdd2d8834b2443172332088c550f09/paradex_py-0.5.5-py3-none-any.whl", hash = "sha256:6822a74982469c2b70a63a6842c575343855f0b3f563ed0d72d2912afbc9ad92", size = 78290 },
 ]
 
 [[package]]
@@ -2186,15 +2181,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4d/3d/0997fe8196f5be24b7015708a0744a0ef928c4fb3c8bc820dc3328208ef2/python-u2flib-host-3.0.3.tar.gz", hash = "sha256:ab678b9dc29466a779efcaa2f0150dce35059a7d17680fc26057fa599a53fc0a", size = 28997 }
 
 [[package]]
-name = "pyunormalize"
-version = "16.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b3/08/568036c725dac746ecb267bb749ef930fb7907454fe69fce83c8557287fb/pyunormalize-16.0.0.tar.gz", hash = "sha256:2e1dfbb4a118154ae26f70710426a52a364b926c9191f764601f5a8cb12761f7", size = 49968 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/f9/9d86e56f716e0651194a5ad58be9c146fcaf1de6901ac6f3cd3affeeb74e/pyunormalize-16.0.0-py3-none-any.whl", hash = "sha256:c647d95e5d1e2ea9a2f448d1d95d8518348df24eab5c3fd32d2b5c3300a49152", size = 49173 },
-]
-
-[[package]]
 name = "pywin32"
 version = "306"
 source = { registry = "https://pypi.org/simple" }
@@ -2651,18 +2637,6 @@ wheels = [
 ]
 
 [[package]]
-name = "types-requests"
-version = "2.32.4.20260107"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "urllib3", marker = "sys_platform != 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/f3/a0663907082280664d745929205a89d41dffb29e89a50f753af7d57d0a96/types_requests-2.32.4.20260107.tar.gz", hash = "sha256:018a11ac158f801bfa84857ddec1650750e393df8a004a8a9ae2a9bec6fcb24f", size = 23165 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1c/12/709ea261f2bf91ef0a26a9eed20f2623227a8ed85610c1e54c5805692ecb/types_requests-2.32.4.20260107-py3-none-any.whl", hash = "sha256:b703fe72f8ce5b31ef031264fe9395cac8f46a04661a79f7ed31a80fb308730d", size = 20676 },
-]
-
-[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2731,30 +2705,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/38/e0/633e369b91bbc664df47dcb5454b6c7cf441e8f5b9d0c250ce9f0546401e/virtualenv-20.30.0.tar.gz", hash = "sha256:800863162bcaa5450a6e4d721049730e7f2dae07720e0902b0e4040bd6f9ada8", size = 4346945 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4c/ed/3cfeb48175f0671ec430ede81f628f9fb2b1084c9064ca67ebe8c0ed6a05/virtualenv-20.30.0-py3-none-any.whl", hash = "sha256:e34302959180fca3af42d1800df014b35019490b119eba981af27f2fa486e5d6", size = 4329461 },
-]
-
-[[package]]
-name = "web3"
-version = "7.14.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "aiohttp", marker = "sys_platform != 'win32'" },
-    { name = "eth-abi", marker = "sys_platform != 'win32'" },
-    { name = "eth-account", marker = "sys_platform != 'win32'" },
-    { name = "eth-hash", extra = ["pycryptodome"], marker = "sys_platform != 'win32'" },
-    { name = "eth-typing", marker = "sys_platform != 'win32'" },
-    { name = "eth-utils", marker = "sys_platform != 'win32'" },
-    { name = "hexbytes", marker = "sys_platform != 'win32'" },
-    { name = "pydantic", marker = "sys_platform != 'win32'" },
-    { name = "pyunormalize", marker = "sys_platform != 'win32'" },
-    { name = "requests", marker = "sys_platform != 'win32'" },
-    { name = "types-requests", marker = "sys_platform != 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform != 'win32'" },
-    { name = "websockets", marker = "sys_platform != 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/26/41/435cb36d36fc5142428292b876d0553d35af95e1582ecb7d8bcb64039d18/web3-7.14.1.tar.gz", hash = "sha256:856dc8517f362aefa75fdc298d975894055565dc866f21279f27fe060b7fb2c3", size = 2208998 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/d1/862bbf48867685de1a563de20a9bad2b8c5c5678b3f08adc0e06797783f5/web3-7.14.1-py3-none-any.whl", hash = "sha256:bec367ba44261f874662aed9b5e138aa7bb907700a30a7580b2264534e88ce12", size = 1371268 },
 ]
 
 [[package]]

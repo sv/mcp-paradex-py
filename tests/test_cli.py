@@ -31,10 +31,11 @@ class TestTransportChoices:
         with (
             patch.object(server_module, "server", mock_server),
             patch("sys.argv", ["mcp-paradex", "--transport", "streamable-http"]),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 
-        mock_server.run.assert_called_once_with(transport="streamable-http")
+        mock_server.streamable_http_app.assert_called_once()
 
     def test_sse_is_rejected(self) -> None:
         with (
@@ -68,6 +69,7 @@ class TestPortWiring:
                 "sys.argv",
                 ["mcp-paradex", "--transport", "streamable-http", "--port", "4242"],
             ),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 
@@ -94,6 +96,7 @@ class TestPortWiring:
         with (
             patch.object(server_module, "server", mock_server),
             patch("sys.argv", ["mcp-paradex", "--transport", "streamable-http"]),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 
@@ -105,6 +108,7 @@ class TestPortWiring:
         with (
             patch.object(server_module, "server", mock_server),
             patch("sys.argv", ["mcp-paradex", "--transport", "streamable-http"]),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 
@@ -123,6 +127,7 @@ class TestStatelessFlag:
                 "sys.argv",
                 ["mcp-paradex", "--transport", "streamable-http", "--stateless"],
             ),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 
@@ -134,6 +139,7 @@ class TestStatelessFlag:
         with (
             patch.object(server_module, "server", mock_server),
             patch("sys.argv", ["mcp-paradex", "--transport", "streamable-http"]),
+            patch("anyio.run"),
         ):
             server_module.run_cli()
 

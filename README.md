@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sv-mcp-paradex-py-badge.png)](https://mseep.ai/app/sv-mcp-paradex-py)
+
 # MCP Paradex Server
 
 <!-- mcp-name: io.github.sv/mcp-paradex-py -->

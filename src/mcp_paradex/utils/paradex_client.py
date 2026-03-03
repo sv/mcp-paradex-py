@@ -4,8 +4,10 @@ Paradex API client utilities.
 
 import asyncio
 import logging
+import time
 from typing import Any
 
+import httpx
 from paradex_py.account.account import ParadexAccount
 from paradex_py.api.api_client import ParadexApiClient
 
@@ -38,19 +40,17 @@ async def get_paradex_client() -> ParadexApiClient:
         if _paradex_client is not None:
             return _paradex_client
 
-        # if not config.is_configured():
-        # raise ValueError(
-        #     "Paradex client configuration is incomplete. "
-        #     "Make sure L1_ADDRESS and L1_PRIVATE_KEY are set."
-        # )
-
-        # _paradex_client = Paradex(
-        #     env=config.ENVIRONMENT,
-        #     logger=logger,
-        #     l1_address=config.L1_ADDRESS,
-        #     l1_private_key=config.L1_PRIVATE_KEY
-        # )
-        _paradex_client = ParadexApiClient(env=config.ENVIRONMENT, logger=logger)
+        logger.info("Initializing Paradex client env=%s", config.ENVIRONMENT)
+        # retries=1 on the transport causes httpx to retry automatically on a fresh
+        # connection when a pooled connection is stale (e.g. after a Lambda freeze).
+        http_client = httpx.Client(
+            transport=httpx.HTTPTransport(retries=1),
+            timeout=httpx.Timeout(30.0),
+        )
+        _paradex_client = ParadexApiClient(
+            env=config.ENVIRONMENT, logger=logger, http_client=http_client
+        )
+        logger.info("Paradex client api_url=%s", _paradex_client.api_url)
 
         if config.PARADEX_ACCOUNT_PRIVATE_KEY:
             logger.info("Authenticating Paradex client")
@@ -61,6 +61,7 @@ async def get_paradex_client() -> ParadexApiClient:
                 l2_private_key=config.PARADEX_ACCOUNT_PRIVATE_KEY,
             )
             _paradex_client.init_account(acc)
+            logger.info("Paradex client authenticated account=%s", _paradex_client.account)
 
         return _paradex_client
 
@@ -95,10 +96,19 @@ async def api_call(
     Returns:
         Dict[str, Any]: The response from the API call.
     """
+    url = f"{client.api_url}/{path}"
+    logger.info("API call url=%s params=%s", url, params)
+    t0 = time.monotonic()
     try:
-        logger.info(f"Calling {path} with params: {params}")
         response = client.get(client.api_url, path, params)
+        logger.info("API call url=%s completed ms=%.0f", url, (time.monotonic() - t0) * 1000)
         return response
-    except Exception:
-        logger.exception(f"Error calling {path}")
+    except Exception as exc:
+        logger.error(
+            "API call url=%s failed ms=%.0f error=%s: %s",
+            url,
+            (time.monotonic() - t0) * 1000,
+            type(exc).__name__,
+            exc,
+        )
         raise

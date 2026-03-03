@@ -10,6 +10,7 @@ global parameters that affect trading operations.
 import logging
 
 from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from paradex_py.api.models import SystemConfig, SystemConfigSchema
 
 from mcp_paradex.models import SystemState
@@ -19,7 +20,7 @@ from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 logger = logging.getLogger(__name__)
 
 
-@server.tool(name="paradex_system_config")
+@server.tool(name="paradex_system_config", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_system_config(ctx: Context) -> SystemConfig:
     """
     Understand the exchange's global parameters that affect all trading activity.
@@ -49,7 +50,7 @@ async def get_system_config(ctx: Context) -> SystemConfig:
         raise e
 
 
-@server.tool(name="paradex_system_state")
+@server.tool(name="paradex_system_state", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_system_state(ctx: Context) -> SystemState:
     """
     Verify the exchange is fully operational before executing trades.

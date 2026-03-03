@@ -11,6 +11,7 @@ from enum import Enum
 from typing import Annotated, Any, Literal
 
 from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from pydantic import BaseModel, Field, TypeAdapter
 
 from mcp_paradex import models
@@ -22,7 +23,7 @@ from mcp_paradex.utils.paradex_client import api_call, get_paradex_client
 logger = logging.getLogger(__name__)
 
 
-@server.tool(name="paradex_filters_model")
+@server.tool(name="paradex_filters_model", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_filters_model(
     tool_name: Annotated[str, Field(description="The name of the tool to get the filters for.")],
 ) -> dict:
@@ -58,7 +59,7 @@ async def get_filters_model(
 market_details_adapter = TypeAdapter(list[MarketDetails])
 
 
-@server.tool(name="paradex_markets")
+@server.tool(name="paradex_markets", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_markets(
     market_ids: Annotated[
         list[str], Field(description="Market symbols to get details for.", default=["ALL"])
@@ -155,7 +156,7 @@ async def get_markets(
 market_summary_adapter = TypeAdapter(list[MarketSummary])
 
 
-@server.tool(name="paradex_market_summaries")
+@server.tool(name="paradex_market_summaries", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_market_summaries(
     market_ids: Annotated[
         list[str], Field(description="Market symbols to get summaries for.", default=["ALL"])
@@ -254,7 +255,7 @@ async def get_market_summaries(
 funding_data_adapter = TypeAdapter(list[FundingData])
 
 
-@server.tool(name="paradex_funding_data")
+@server.tool(name="paradex_funding_data", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_funding_data(
     market_id: Annotated[str, Field(description="Market symbol to get funding data for.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
@@ -310,7 +311,7 @@ class OrderbookDepth(int, Enum):
     FULL = 100
 
 
-@server.tool(name="paradex_orderbook")
+@server.tool(name="paradex_orderbook", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_orderbook(
     market_id: Annotated[str, Field(description="Market symbol to get orderbook for.")],
     depth: Annotated[
@@ -364,7 +365,7 @@ class OHLCV(BaseModel):
 ohlcv_adapter = TypeAdapter(list[OHLCV])
 
 
-@server.tool(name="paradex_klines")
+@server.tool(name="paradex_klines", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_klines(
     market_id: Annotated[str, Field(description="Market symbol to get klines for.")],
     resolution: Annotated[
@@ -430,7 +431,7 @@ async def get_klines(
 trade_adapter = TypeAdapter(list[Trade])
 
 
-@server.tool(name="paradex_trades")
+@server.tool(name="paradex_trades", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_trades(
     market_id: Annotated[str, Field(description="Market symbol to get trades for.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
@@ -477,7 +478,7 @@ async def get_trades(
         raise e
 
 
-@server.tool(name="paradex_bbo")
+@server.tool(name="paradex_bbo", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_bbo(
     market_id: Annotated[str, Field(description="Market symbol to get BBO for.")],
     ctx: Context = None,

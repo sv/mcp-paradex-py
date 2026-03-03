@@ -18,12 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "mcp[cli]>=1.10.1",
-    "paradex-py>=0.4.6",
+    "mcp[cli]>=1.26.0",
+    "paradex-py>=0.5.4",
     "pydantic>=2.11.0",
     "uvicorn>=0.35.0",
     "python-dotenv>=1.0.1",
-    "argparse>=1.4.0",
     "aiohttp>=3.12.0",
     "jmespath>=1.0.1",
 ]
@@ -36,6 +35,7 @@ dev = [
     "pre-commit>=4.2.0",
     "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
+    "pytest-asyncio>=0.25.0",
 ]
 
 [project.scripts]
@@ -128,9 +128,15 @@ module = ["paradex_py.*", "mcp.*", "pydantic.*"]
 ignore_missing_imports = true
 ignore_errors = true
 
+[tool.uv]
+# mcp>=1.26 requires pywin32>=310 on Windows, paradex-py requires pywin32==306 via starknet-py.
+# This project targets Linux/macOS only, so we restrict the resolution environments accordingly.
+environments = ["sys_platform != 'win32'"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
 python_classes = "Test*"
 addopts = "--cov=mcp_paradex --cov-report=term-missing"
+asyncio_mode = "auto"

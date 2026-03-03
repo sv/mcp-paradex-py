@@ -4,10 +4,12 @@ MCP server implementation for Paradex integration.
 
 import argparse
 import logging
+import os
 import sys
 from typing import Any
 
 from mcp.server.fastmcp.server import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from mcp_paradex import __version__
 from mcp_paradex.utils.config import config
@@ -61,21 +63,37 @@ def run_cli() -> None:
     parser = argparse.ArgumentParser(description="MCP Paradex Server")
     parser.add_argument(
         "--transport",
-        choices=["stdio", "sse"],
-        default="stdio",
-        help="Transport to use (stdio or sse)",
+        choices=["stdio", "streamable-http"],
+        default=os.environ.get("MCP_TRANSPORT", "stdio"),
+        help="Transport to use (stdio or streamable-http) [env: MCP_TRANSPORT]",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=config.SERVER_PORT,
-        help=f"Port for SSE transport (default: {config.SERVER_PORT})",
+        default=int(os.environ.get("MCP_PORT", str(config.SERVER_PORT))),
+        help=f"Port for streamable-http transport (default: {config.SERVER_PORT}) [env: MCP_PORT]",
+    )
+    parser.add_argument(
+        "--stateless",
+        action="store_true",
+        default=os.environ.get("MCP_STATELESS", "").lower() in ("1", "true", "yes"),
+        help="Enable stateless HTTP mode (required for Lambda / serverless deployments) [env: MCP_STATELESS]",
     )
     args = parser.parse_args()
 
     logger.info(f"Starting MCP Paradex server with {args.transport} transport...")
 
     try:
+        if args.transport == "streamable-http":
+            server.settings.port = args.port
+            server.settings.stateless_http = args.stateless
+            server.settings.host = "0.0.0.0"  # bind all interfaces for container deployments
+            # Disable DNS rebinding protection: the Host header won't be localhost
+            # when running behind Lambda Function URL / CloudFront. Security is
+            # handled at the infrastructure layer (TLS, IAM, CloudFront).
+            server.settings.transport_security = TransportSecuritySettings(
+                enable_dns_rebinding_protection=False
+            )
         server.run(transport=args.transport)
     except KeyboardInterrupt:
         logger.info("Server stopped by user")

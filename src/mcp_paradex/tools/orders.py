@@ -17,7 +17,10 @@ from mcp_paradex.utils.paradex_client import get_authenticated_paradex_client
 order_state_adapter = TypeAdapter(list[OrderState])
 
 
-@server.tool(name="paradex_open_orders", annotations=ToolAnnotations(readOnlyHint=True))
+@server.tool(
+    name="paradex_open_orders",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_open_orders(
     market_id: Annotated[str, Field(default="ALL", description="Filter by market.")],
     limit: Annotated[
@@ -77,7 +80,10 @@ async def get_open_orders(
     return result
 
 
-@server.tool(name="paradex_create_order")
+@server.tool(
+    name="paradex_create_order",
+    annotations=ToolAnnotations(destructiveHint=False, requiresAuth=True),
+)
 async def create_order(
     market_id: Annotated[str, Field(description="Market identifier.")],
     order_side: Annotated[OrderSideEnum, Field(description="Order side.")],
@@ -135,7 +141,10 @@ async def create_order(
     return result
 
 
-@server.tool(name="paradex_cancel_orders")
+@server.tool(
+    name="paradex_cancel_orders",
+    annotations=ToolAnnotations(destructiveHint=True, requiresAuth=True),
+)
 async def cancel_orders(
     order_id: Annotated[
         str, Field(default="", description="Order id (received from create_order)")
@@ -186,7 +195,10 @@ async def cancel_orders(
     return order
 
 
-@server.tool(name="paradex_order_status")
+@server.tool(
+    name="paradex_order_status",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_order_status(
     order_id: Annotated[str, Field(description="Order identifier.")],
     client_id: Annotated[str, Field(description="Client-specified order ID.")],
@@ -228,7 +240,10 @@ async def get_order_status(
     return result
 
 
-@server.tool(name="paradex_orders_history")
+@server.tool(
+    name="paradex_orders_history",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_orders_history(
     market_id: Annotated[str, Field(description="Filter by market.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],

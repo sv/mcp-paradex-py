@@ -17,11 +17,11 @@ startCommand:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
     (config) => ({
-      command: 'mcp-paradex',
-      args: ['--transport', 'stdio'],
+      command: 'uvx',
+      args: ['mcp-paradex'],
       env: {
-        'PARADEX_ENVIRONMENT': config.paradexEnvironment,
-        'PARADEX_ACCOUNT_PRIVATE_KEY': config.paradexAccountPrivateKey
+        PARADEX_ENVIRONMENT: config.paradexEnvironment || 'prod',
+        ...(config.paradexAccountPrivateKey ? { PARADEX_ACCOUNT_PRIVATE_KEY: config.paradexAccountPrivateKey } : {})
       }
     })
   exampleConfig:

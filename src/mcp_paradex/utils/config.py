@@ -26,7 +26,7 @@ class Config:
     SERVER_PORT: int = int(os.getenv("SERVER_PORT", "3000"))
 
     # Paradex configuration
-    ENVIRONMENT: Environment = Environment(os.getenv("PARADEX_ENVIRONMENT", "prod"))
+    ENVIRONMENT: str = os.getenv("PARADEX_ENVIRONMENT", "prod")
 
     PARADEX_ACCOUNT_ADDRESS: str | None = os.getenv("PARADEX_ACCOUNT_ADDRESS")
     PARADEX_ACCOUNT_PRIVATE_KEY: str | None = os.getenv("PARADEX_ACCOUNT_PRIVATE_KEY")

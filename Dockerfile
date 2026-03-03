@@ -34,5 +34,10 @@ COPY --from=uv /app /app
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
-# when running the container, add --db-path and a bind mount to the host's db file
+EXPOSE 8080
+
+# Default: stdio (for local use / Claude Desktop).
+# For Lambda / remote HTTP: override with
+#   CMD ["--transport", "streamable-http", "--port", "8080", "--stateless"]
 ENTRYPOINT ["mcp-paradex"]
+CMD []

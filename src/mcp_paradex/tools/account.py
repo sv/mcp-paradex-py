@@ -5,6 +5,7 @@ Account management tools.
 from typing import Annotated
 
 from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from pydantic import Field, TypeAdapter
 
 from mcp_paradex.models import AccountSummary, Fill, Position, Transaction
@@ -14,7 +15,10 @@ from mcp_paradex.utils.paradex_client import api_call, get_authenticated_paradex
 account_summary_adapter = TypeAdapter(AccountSummary)
 
 
-@server.tool(name="paradex_account_summary")
+@server.tool(
+    name="paradex_account_summary",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_account_summary(ctx: Context) -> dict:
     """
     Get a snapshot of your account's current financial status and trading capacity.
@@ -47,7 +51,10 @@ async def get_account_summary(ctx: Context) -> dict:
 position_adapter = TypeAdapter(list[Position])
 
 
-@server.tool(name="paradex_account_positions")
+@server.tool(
+    name="paradex_account_positions",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_account_positions(ctx: Context) -> dict:
     """
     Analyze your open positions to monitor exposure, profitability, and risk.
@@ -85,7 +92,10 @@ async def get_account_positions(ctx: Context) -> dict:
 fill_adapter = TypeAdapter(list[Fill])
 
 
-@server.tool(name="paradex_account_fills")
+@server.tool(
+    name="paradex_account_fills",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_account_fills(
     market_id: Annotated[str, Field(description="Filter by market ID.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
@@ -127,7 +137,10 @@ async def get_account_fills(
     return results
 
 
-@server.tool(name="paradex_account_funding_payments")
+@server.tool(
+    name="paradex_account_funding_payments",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_account_funding_payments(
     market_id: Annotated[str | None, Field(default=None, description="Filter by market ID.")],
     start_unix_ms: Annotated[int, Field(description="Start time in unix milliseconds.")],
@@ -165,7 +178,10 @@ async def get_account_funding_payments(
 transaction_adapter = TypeAdapter(list[Transaction])
 
 
-@server.tool(name="paradex_account_transactions")
+@server.tool(
+    name="paradex_account_transactions",
+    annotations=ToolAnnotations(readOnlyHint=True, requiresAuth=True),
+)
 async def get_account_transactions(
     transaction_type: Annotated[
         str | None, Field(default=None, description="Filter by transaction type.")

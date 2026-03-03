@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 from typing import Annotated, Any
 
+from mcp.types import ToolAnnotations
 from pydantic import Field, TypeAdapter
 
 from mcp_paradex.models import (
@@ -34,7 +35,7 @@ vault_strategy_adapter = TypeAdapter(list[VaultStrategy])
 vault_adapter = TypeAdapter(list[Vault])
 
 
-@server.tool(name="paradex_vaults")
+@server.tool(name="paradex_vaults", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vaults(
     vault_address: Annotated[
         str,
@@ -120,7 +121,7 @@ async def get_vaults(
 vault_balance_adapter = TypeAdapter(list[VaultBalance])
 
 
-@server.tool(name="paradex_vault_balance")
+@server.tool(name="paradex_vault_balance", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vault_balance(
     vault_address: Annotated[
         str, Field(description="The address of the vault to get balance for.")
@@ -151,7 +152,7 @@ async def get_vault_balance(
 vault_summary_adapter = TypeAdapter(list[VaultSummary])
 
 
-@server.tool(name="paradex_vault_summary")
+@server.tool(name="paradex_vault_summary", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vault_summary(
     vault_address: Annotated[
         str,
@@ -233,7 +234,7 @@ async def get_vault_summary(
         raise e
 
 
-@server.tool(name="paradex_vault_transfers")
+@server.tool(name="paradex_vault_transfers", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vault_transfers(
     vault_address: Annotated[
         str, Field(description="The address of the vault to get transfers for.")
@@ -277,7 +278,7 @@ async def get_vault_transfers(
 position_adapter = TypeAdapter(list[Position])
 
 
-@server.tool(name="paradex_vault_positions")
+@server.tool(name="paradex_vault_positions", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vault_positions(
     vault_address: Annotated[
         str, Field(description="The address of the vault to get positions for.")
@@ -316,7 +317,7 @@ async def get_vault_positions(
 vault_account_summary_adapter = TypeAdapter(list[VaultAccountSummary])
 
 
-@server.tool(name="paradex_vault_account_summary")
+@server.tool(name="paradex_vault_account_summary", annotations=ToolAnnotations(readOnlyHint=True))
 async def get_vault_account_summary(
     vault_address: Annotated[
         str, Field(description="The address of the vault to get account summary for.")

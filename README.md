@@ -1,5 +1,7 @@
 # MCP Paradex Server
 
+<!-- mcp-name: io.github.sv/mcp-paradex-py -->
+
 [![smithery badge](https://smithery.ai/badge/@sv/mcp-paradex-py)](https://smithery.ai/server/@sv/mcp-paradex-py)
 
 Model Context Protocol (MCP) server implementation for the Paradex trading platform.
@@ -86,7 +88,7 @@ uvx mcp-paradex
 
 Set these environment variables for authentication:
 
-- `PARADEX_ENVIRONMENT`: Set to `testnet` or `mainnet`
+- `PARADEX_ENVIRONMENT`: Set to `prod`, `testnet`, or `nightly` (default: `prod`)
 - `PARADEX_ACCOUNT_PRIVATE_KEY`: Your Paradex account private key
 
 ### Using .env File
@@ -117,7 +119,7 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-#### Docker
+#### Docker (local / stdio)
 
 ```bash
 # Build image
@@ -129,6 +131,39 @@ docker run --rm -i sv/mcp-paradex-py
 # Run with trading capabilities
 docker run --rm -e PARADEX_ACCOUNT_PRIVATE_KEY=your_key -i sv/mcp-paradex-py
 ```
+
+#### Docker (AWS Lambda / HTTP)
+
+Use `Dockerfile.aws` for remote deployments via AWS Lambda with the
+[Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter).
+The adapter bridges Lambda invocations to the server's HTTP endpoint,
+so no Lambda-specific code is needed.
+
+```bash
+# Build
+docker build -f Dockerfile.aws -t sv/mcp-paradex-py-aws .
+
+# Test locally (mirrors Lambda config)
+docker run --rm -p 8080:8080 \
+  -e MCP_TRANSPORT=streamable-http \
+  -e MCP_STATELESS=true \
+  -e MCP_PORT=8080 \
+  -e PARADEX_ENVIRONMENT=prod \
+  sv/mcp-paradex-py-aws
+```
+
+The server will be available at `http://localhost:8080/mcp`.
+
+**Deploying to Lambda:**
+
+1. Push the image to ECR
+2. Create a Lambda function from the container image
+3. Set the Lambda Function URL invoke mode to `RESPONSE_STREAM`
+4. Set environment variables on the Lambda function:
+   - `MCP_TRANSPORT=streamable-http`
+   - `MCP_STATELESS=true`
+   - `PARADEX_ENVIRONMENT=prod` (or `testnet`)
+   - `PARADEX_ACCOUNT_PRIVATE_KEY=your_key` (optional, for trading)
 
 ## Available Resources and Tools
 

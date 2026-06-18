@@ -1,8 +1,6 @@
 # MCP Paradex Server
 
-<!-- mcp-name: io.github.sv/mcp-paradex-py -->
-
-[![smithery badge](https://smithery.ai/badge/@sv/mcp-paradex-py)](https://smithery.ai/server/@sv/mcp-paradex-py)
+Up to date supported version can be found here https://github.com/tradeparadex/mcp-paradex-py
 
 Model Context Protocol (MCP) server implementation for the Paradex trading platform.
 
